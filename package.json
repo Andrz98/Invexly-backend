@@ -9,13 +9,12 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "repository": {
-    "type": "git",
+    "type": "",
     "url": "git+https://github.com/FSDSTR1024/TFM-backend-verde.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "bugs": {
     "url": "https://github.com/FSDSTR1024/TFM-backend-verde/issues"
   },
