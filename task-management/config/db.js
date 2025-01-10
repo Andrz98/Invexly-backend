@@ -4,4 +4,4 @@ function probarHusky() {
 
   // Falta una comilla de cierre en el console.log. 
   // Esto ocasionará un error de sintaxis y romperá la ejecución.
-}
+};;
