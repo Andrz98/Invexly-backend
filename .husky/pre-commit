@@ -1,4 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+echo "🔍 Iniciando pre-commit..."
 npx lint-staged
+echo "✅ Pre-commit finalizado."
