@@ -1,8 +1,8 @@
 require('dotenv').config() // Cargar las variables de entorno
 const express = require('express') // Framework para crear servidores HTTP
-const mongoose = require('./config/db') // Configuración de la base de datos
-const authRoutes = require('./auth/routes/authRoutes') // Rutas para autenticación
-const errorHandler = require('./auth/middlewares/errorHandler') // Middleware de manejo de errores
+const mongoose = require('mongoose') // Configuración de la base de datos
+const authRoutes = require('./task-management/routes/authRoutes') // Rutas para autenticación
+const errorHandler = require('./task-management/middlewares/errorHandler') // Middleware de manejo de errores
 
 const app = express() // Inicializa la aplicación Express
 const port = process.env.PORT || 3000 // Define el puerto
@@ -11,10 +11,7 @@ const port = process.env.PORT || 3000 // Define el puerto
 // Conexión a la base de datos
 // ========================
 // Conecta la aplicación con la base de datos MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGO_URI)
 
 // ========================
 // Middlewares globales
