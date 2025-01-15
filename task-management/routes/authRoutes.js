@@ -1,8 +1,8 @@
-const express = require('express') // Framework para manejar rutas y solicitudes
-const { signIn, signOut } = require('../controllers/authController') // Controladores de autenticación
-const validateAuth = require('../middlewares/validateAuth') // Middleware para validar datos de entrada
+// const express = require('express') // Framework para manejar rutas y solicitudes
+// const { signIn, signOut } = require('../controllers/authController') // Controladores de autenticación
+// const validateAuth = require('../middlewares/validateAuth') // Middleware para validar datos de entrada
 
-const router = express.Router() // Instancia de router de Express
+// const router = express.Router() // Instancia de router de Express
 
 // ========================
 // Ruta: Sign In
@@ -15,7 +15,6 @@ const router = express.Router() // Instancia de router de Express
  * @function
  * @memberof module:authRoutes
  */
-router.post('/sign-in', validateAuth, signIn)
 
 // ========================
 // Ruta: Sign Out
@@ -28,6 +27,5 @@ router.post('/sign-in', validateAuth, signIn)
  * @function
  * @memberof module:authRoutes
  */
-router.post('/sign-out', signOut)
 
 module.exports = router // Exporta el router
