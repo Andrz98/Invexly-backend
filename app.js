@@ -1,29 +1,31 @@
-const express = require('express') // Framework para crear servidores HTTP
-const mongoose = require('mongoose') // Configuración de la base de datos
-const authRoutes = require('./task-management/routes/authRoutes') // Rutas para autenticación
-const errorHandler = require('./task-management/middlewares/errorHandler') // Middleware de manejo de errores
+const express = require('express')
+const mongoose = require('mongoose')
+const path = require('path') // Added path import
+const authRoutes = require('./task-management/routes/authRoutes')
+const errorHandler = require('./task-management/middlewares/errorHandler')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('./models/user')
-require('dotenv').config() // Cargar las variables de entorno
+require('dotenv').config()
 
-const app = express() // Inicializa la aplicación Express
-const port = process.env.PORT || 3000 // Define el puerto
+const app = express()
+const port = process.env.PORT || 3000
 const cors = require('cors')
-const multer = require('multer') //Para cargar y almacenar la imagen del usuario
+const multer = require('multer')
 const cookieParser = require('cookie-parser')
 
-app.use(cookieParser()) // Middleware para el manejo de las cookies
+// Middleware configuration
+app.use(cookieParser())
 app.use(express.json())
 
-
-app.use(cors({
-  origin: 'http://localhost:5173', // Permite el acceso desde el frontend en localhost:5173
-  credentials: true, // Habilita credenciales
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}))
-
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+)
 
 // ========================
 // Conexión a la base de datos
@@ -137,7 +139,7 @@ app.post('/register', async (req, res) => {
       username,
       email,
       password, // En production, encriptarla
-      role: role || 'user'
+      role: role || 'user',
     })
 
     await newUser.save()
