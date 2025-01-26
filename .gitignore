@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .ENV
+dbcopy.js
+user_2.js
+user copy.js
