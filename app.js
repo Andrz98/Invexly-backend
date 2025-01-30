@@ -1,9 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const path = require('path') // Added path import
 const authRoutes = require('./task-management/routes/authRoutes')
 const errorHandler = require('./task-management/middlewares/errorHandler')
-const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const User = require('./models/user')
 require('dotenv').config()
@@ -11,7 +9,6 @@ require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 3000
 const cors = require('cors')
-const multer = require('multer')
 const cookieParser = require('cookie-parser')
 
 // Middleware configuration
@@ -30,7 +27,6 @@ app.use(
 // ========================
 // Conexión a la base de datos
 // ========================
-// Conecta la aplicación con la base de datos MongoDB
 const dbConectar = process.env.MONGO_URI
 mongoose
   .connect(dbConectar, {})
@@ -42,22 +38,18 @@ mongoose
 // ========================
 // Middlewares globales
 // ========================
-// Habilitar parseo de JSON en las solicitudes
 app.use(express.json())
 
 // ========================
 // Rutas
 // ========================
-// Define las rutas principales para autenticación
 app.use('/auth', authRoutes)
 
-// Respuesta por defecto
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-//Endpoint de logueo
-
+// Endpoint de logueo
 app.post('/login', async (req, res) => {
   const { email, password } = req.body
 
@@ -68,7 +60,6 @@ app.post('/login', async (req, res) => {
   })
 
   try {
-    // Find user by email
     const user = await User.findOne({ email })
     console.log('User found:', !!user)
 
@@ -77,7 +68,6 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
-    // Check existing users in DB
     const allUsers = await User.find({})
     console.log(
       'Existing users:',
@@ -87,7 +77,6 @@ app.post('/login', async (req, res) => {
       }))
     )
 
-    // Direct password comparison (temporarily)
     if (user.password !== password) {
       console.log('Password mismatch', {
         storedPassword: user.password,
@@ -105,7 +94,7 @@ app.post('/login', async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Changed from 'strict' to 'lax'
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
@@ -115,7 +104,7 @@ app.post('/login', async (req, res) => {
       username: user.username,
       email: user.email,
       role: user.role,
-      token: token, // Include token in response
+      token: token,
     })
   } catch (error) {
     console.error('Login error:', error)
@@ -123,35 +112,31 @@ app.post('/login', async (req, res) => {
   }
 })
 
-//Endopoint de registro
+// Endpoint de registro
 app.post('/register', async (req, res) => {
   const { username, email, password, role } = req.body
   try {
-    // Check if user already exists
     const existingUser = await User.findOne({ email })
     if (existingUser) {
       console.log('Usuario ya existe:', email)
       return res.status(400).json({ message: 'Este email ya está registrado' })
     }
 
-    // Crear un nuevo usuario
     const newUser = new User({
       username,
       email,
-      password, // En production, encriptarla
+      password,
       role: role || 'user',
     })
 
     await newUser.save()
 
-    // Create token
     const token = jwt.sign(
       { userId: newUser._id, email: newUser.email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     )
 
-    // Set cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -172,9 +157,8 @@ app.post('/register', async (req, res) => {
   }
 })
 
-//Endpoint para traer todos los usuarios de la BD
+// Endpoint para obtener usuarios
 app.get('/users', async (req, res) => {
-  // Verificar si existe el header de autorización
   const authHeader = req.headers.authorization
   if (!authHeader) {
     return res
@@ -182,28 +166,22 @@ app.get('/users', async (req, res) => {
       .json({ message: 'No se proporcionó token de autorización' })
   }
 
-  // Obtener el token
-  const token = req.headers.authorization.split(' ')[1]
+  const token = authHeader.split(' ')[1]
 
   try {
-    // Verificar el token y decodificar la información del usuario
     const loggedUser = jwt.verify(token, process.env.JWT_SECRET)
-
-    // Verificar si el usuario aún existe en la base de datos
     const userExists = await User.findById(loggedUser.userId)
     if (!userExists) {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
-    // Verificar si el usuario tiene permisos (por ejemplo, si es admin)
     if (userExists.role !== 'admin') {
       return res
         .status(403)
         .json({ message: 'No tienes permisos para ver la lista de usuarios' })
     }
 
-    // Si todas las verificaciones pasan, obtener la lista de usuarios
-    const users = await User.find({}, '-password') // Excluimos el campo password
+    const users = await User.find({}, '-password')
     res.json(users)
   } catch (error) {
     console.error('Error al verificar token o obtener usuarios:', error)
@@ -217,15 +195,13 @@ app.get('/users', async (req, res) => {
   }
 })
 
-// Endpoint para validar el token
+// Validar token
 app.get('/validate-token', async (req, res) => {
-  // Log the incoming request to debug
-
   const token = req.cookies.token
 
   if (!token) {
-    console.log('No se encontro el token')
-    return res.status(401).json({ message: 'No se encontro el token' })
+    console.log('No se encontró el token')
+    return res.status(401).json({ message: 'No se encontró el token' })
   }
 
   try {
@@ -234,7 +210,7 @@ app.get('/validate-token', async (req, res) => {
 
     if (!user) {
       console.log('Usuario no encontrado')
-      return res.status(401).json({ message: ' token invalido ' })
+      return res.status(401).json({ message: 'Token inválido' })
     }
 
     res.json({
@@ -243,17 +219,18 @@ app.get('/validate-token', async (req, res) => {
       email: user.email,
       role: user.role,
     })
-  } catch (error) {
-    return res.status(401).json({ message: 'Token invalido o expirado' })
+  } catch {
+    return res.status(401).json({ message: 'Token inválido o expirado' })
   }
 })
+
 // Logout
 app.post('/logout', (req, res) => {
   res.clearCookie('token')
   res.json({ message: 'Deslogueado correctamente' })
 })
 
-//Endpoint para traer un usuario especifico de la BD
+// Endpoint para usuario específico (corregido)
 app.get('/api/user/:id', async (req, res) => {
   const authHeader = req.headers.authorization
   if (!authHeader) {
@@ -263,79 +240,29 @@ app.get('/api/user/:id', async (req, res) => {
   const token = authHeader.split(' ')[1]
 
   try {
-    const loggedUser = jwt.verify(token, process.env.JWT_SECRET)
+    jwt.verify(token, process.env.JWT_SECRET) // Eliminamos _loggedUser
     const user = await User.findById(req.params.id)
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
     res.json(user)
-  } catch (error) {
+  } catch {
     return res.status(401).json({ message: 'No Autorizado' })
-  }
-})
-//--------------------------------------------------
-// Configuración de multer para la carga de imágenes
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'src/images'))
-  },
-  filename: (req, file, cb) => {
-    const userId = req.body.id
-    cb(null, `${userId}.jpg`)
-  },
-})
-
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    // Verificar que el archivo sea una imagen JPG o JPEG
-    const filetypes = /jpeg|jpg/
-    const mimetype = filetypes.test(file.mimetype)
-    const extname = filetypes.test(
-      path.extname(file.originalname).toLowerCase()
-    )
-
-    if (mimetype && extname) {
-      return cb(null, true)
-    } else {
-      cb(new Error('Solo se permiten archivos JPG o JPEG'))
-    }
-  },
-})
-
-// Endpoint para la carga de la imagen
-app.post('/upload-image', upload.single('image'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ message: 'No se ha proporcionado una imagen' })
-    }
-
-    res.status(200).json({
-      message: 'Imagen subida con éxito',
-      filePath: `/src/images/${req.file.filename}`,
-    })
-  } catch (error) {
-    console.error('Error al subir la imagen:', error)
-    res.status(500).json({ message: 'Error interno del servidor' })
   }
 })
 
 // ========================
 // Inicio del servidor
 // ========================
-// Inicia el servidor y muestra un mensaje en la consola
 app.listen(port, () =>
   console.log(`✅ Servidor ejecutándose en http://localhost:${port}`)
 )
+
 // ========================
 // Manejo de errores
 // ========================
-// Middleware global para manejar errores
 app.use(errorHandler)
 
-//Manejo de rutas no encontradas
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found.' })
 })
