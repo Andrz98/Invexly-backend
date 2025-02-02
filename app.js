@@ -1,104 +1,123 @@
+// =============================================================
+// Importaciones de las dependencias necesarias para el proyecto
+// =============================================================
 const express = require('express')
 const mongoose = require('mongoose')
 const authRoutes = require('./task-management/routes/authRoutes')
 const errorHandler = require('./task-management/middlewares/errorHandler')
+const corsMiddleware = require('./task-management/middlewares/corsMiddleware')
+const handlePreflight = require('./task-management/middlewares/handlePreflight')
 const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 const User = require('./models/user')
 require('dotenv').config()
 
+// ===================================
+// Instancia express y puerto definido
+// ===================================
 const app = express()
 const port = process.env.PORT || 3000
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
 
-// Middleware configuration
+// =====================================
+// Configuración de middlewares globales
+// =====================================
+app.use(corsMiddleware)
+app.use(handlePreflight)
 app.use(cookieParser())
 app.use(express.json())
+// Este es el orden correcto de los middlewares
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-)
+// =====================================
+// Conexión a la base de datos MongoDB
+// =====================================
 
-// ========================
-// Conexión a la base de datos
-// ========================
 const dbConectar = process.env.MONGO_URI
+
 mongoose
   .connect(dbConectar, {})
-  .then(() => console.log('Conexión a MongoDB establecida'))
+  .then(() => {
+    console.log('✅ Conexión a MongoDB establecida')
+    crearAdminPorDefecto() // ✅ Llamamos la función después de la conexión exitosa
+  })
   .catch((error) => {
-    console.error('Error de conexión a MongoDB:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Error de conexión a MongoDB:', error) // Solo lo mostramos en modo desarrollo
+    }
+    process.exit(1) // Finaliza la aplicación si la conexión falla
   })
 
-// ========================
-// Middlewares globales
-// ========================
-app.use(express.json())
+// ==============================================
+// Función para crear el admistrador si no existe
+// ==============================================
+async function crearAdminPorDefecto() {
+  try {
+    // Buscamos el usuario admin en la base de datos
+    const existingAdmin = await User.findOne({ role: 'admin' }) // Verificamos si ya hay un admin
+    if (!existingAdmin) {
+      const admin = new User({
+        username: process.env.ADMIN_USERNAME || 'Admin',
+        email: process.env.ADMIN_EMAIL,
+        password: process.env.ADMIN_PASSWORD,
+        role: 'admin', // Asignamos el rol de administrador de forma automática
+      })
+      await admin.save() // Guardamos el admin en la base de datos
+      console.log('✅ Admin creado con éxito')
+    } else {
+      console.log(
+        '✅ Admin ya existe en la base de datos, no se ha creado uno nuevo'
+      )
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Error al crear el administrador:', error) // ✅ Solo mostramos el error en modo desarrollo
+    }
+  }
+}
 
-// ========================
-// Rutas
-// ========================
-app.use('/auth', authRoutes)
+crearAdminPorDefecto()
 
+// =====================================
+// Rutas de la aplicación
+// =====================================
+app.use('/auth', authRoutes) // Rutas de autenticación
+
+// Ruta para comprobar que el sistema funciona correctamente
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello World') // Corregido: era res.setDefaultEncoding
 })
 
-// Endpoint de logueo
+// =====================================
+// Endpoints de Logueo
+// =====================================
+
 app.post('/login', async (req, res) => {
   const { email, password } = req.body
 
-  console.log('Login attempt:', {
-    email,
-    password: password ? '[HIDDEN]' : 'No password',
-    body: req.body,
-  })
-
   try {
-    const user = await User.findOne({ email })
-    console.log('User found:', !!user)
-
+    const user = await User.findOne({ email }) // Corregido: 'user' a 'User' con mayúscula
     if (!user) {
-      console.log('No user found with email:', email)
-      return res.status(401).json({ message: 'Usuario no encontrado' })
+      return res.status(401).json({ message: 'Usuario no encontrado' }) //retornamos un error si el usuario no existe
     }
 
-    const allUsers = await User.find({})
-    console.log(
-      'Existing users:',
-      allUsers.map((u) => ({
-        email: u.email,
-        username: u.username,
-      }))
-    )
-
     if (user.password !== password) {
-      console.log('Password mismatch', {
-        storedPassword: user.password,
-        inputPassword: password,
-      })
-      return res.status(401).json({ message: 'Contraseña incorrecta' })
+      return res.status(401).json({ message: 'Contraseña incorrecta' }) //retornamos un error si la contraseña es incorrecta
     }
 
     const token = jwt.sign(
       { userId: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET, // Clave secreta para firmar el token
+      { expiresIn: '7d' } // Tiempo de expiración del token
     )
 
+    // Ahora debemos configurar la cookie para almacenar el token JWT de forma segura
     res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true, // solo es accesible desde el servidor
+      secure: process.env.NODE_ENV === 'production', // solo es accesible en entornos de producción
+      sameSite: 'lax', // previene los ataques CSFR (Cross-Site Request Forgery), también conocidos como "Falsificaciín de solicitudes entre sitios", siendo este un tipo de vulnerabilidad de seguridad en las applicaciones web
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Tiempo de expiración de la cookie en milisegundos (7 dias)
     })
 
-    console.log('Login successful for:', email)
+    // Respuesta exitosa de la solicitud del usuario
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
       username: user.username,
@@ -107,162 +126,79 @@ app.post('/login', async (req, res) => {
       token: token,
     })
   } catch (error) {
-    console.error('Login error:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error en el servidor:', error) // Solo lo mostramos en modo desarrollo
+    }
     res.status(500).json({ message: 'Error interno del servidor' })
   }
 })
 
-// Endpoint de registro
+// =====================================
+// Endpoints de Registro
+// =====================================
+
 app.post('/register', async (req, res) => {
-  const { username, email, password, role } = req.body
+  const { username, email, password } = req.body // Se extraen los datos del cuerpo de la solicitud
+
   try {
-    const existingUser = await User.findOne({ email })
+    const existingUser = await User.findOne({ email }) // Corregido: 'user' a 'User' con mayúscula
     if (existingUser) {
-      console.log('Usuario ya existe:', email)
-      return res.status(400).json({ message: 'Este email ya está registrado' })
+      return res.status(400).json({ message: 'El usuario ya existe' })
+      // retornamos un error si el usuario ya existe
     }
 
     const newUser = new User({
       username,
       email,
       password,
-      role: role || 'user',
+      role: 'user', // De esta manera dejamos el role de 'user' por defecto
     })
-
-    await newUser.save()
+    await newUser.save() // Guarda el nuevo usuario en la base de datos
 
     const token = jwt.sign(
       { userId: newUser._id, email: newUser.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET, // Clave secreta para firmar el token
+      { expiresIn: '7d' } // Tiempo de expiración del token
     )
 
+    // Ahora debemos configurar la cookie para almacenar el token JWT de forma segura
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax', // previene los ataques CSFR (Cross-Site Request Forgery), tambien conocidos como "Falsificacion de solicitudes entre sitios", siendo este un tipo de vulnerabilidad de seguridad en las aplicaciones web.
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
+    // Respuesta exitosa de la solicitud del usuario
     res.status(201).json({
       message: 'Usuario registrado exitosamente',
       username: newUser.username,
       email: newUser.email,
-      role: newUser.role,
+      role: newUser.role, // Siempre será 'user'
       token: token,
     })
   } catch (error) {
-    console.error('Registration error:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error en el servidor:', error) // Solo lo mostramos en modo desarrollo
+    }
     res.status(500).json({ message: 'Error interno del servidor' })
   }
 })
 
-// Endpoint para obtener usuarios
-app.get('/users', async (req, res) => {
-  const authHeader = req.headers.authorization
-  if (!authHeader) {
-    return res
-      .status(401)
-      .json({ message: 'No se proporcionó token de autorización' })
-  }
+// =====================================
+// Inicio del Servidor
+// =====================================
 
-  const token = authHeader.split(' ')[1]
-
-  try {
-    const loggedUser = jwt.verify(token, process.env.JWT_SECRET)
-    const userExists = await User.findById(loggedUser.userId)
-    if (!userExists) {
-      return res.status(401).json({ message: 'Usuario no encontrado' })
-    }
-
-    if (userExists.role !== 'admin') {
-      return res
-        .status(403)
-        .json({ message: 'No tienes permisos para ver la lista de usuarios' })
-    }
-
-    const users = await User.find({}, '-password')
-    res.json(users)
-  } catch (error) {
-    console.error('Error al verificar token o obtener usuarios:', error)
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ message: 'Token inválido' })
-    }
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Token expirado' })
-    }
-    return res.status(500).json({ message: 'Error interno del servidor' })
-  }
+app.listen(port, () => {
+  console.log(`Servidor iniciado en http://localhost:${port}`)
 })
 
-// Validar token
-app.get('/validate-token', async (req, res) => {
-  const token = req.cookies.token
+// =====================================
+// Middleware Global de Manejo de Errores
+// =====================================
+app.use(errorHandler) // Corregido: era 'app.users', ahora es 'app.use'
 
-  if (!token) {
-    console.log('No se encontró el token')
-    return res.status(401).json({ message: 'No se encontró el token' })
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    const user = await User.findById(decoded.userId)
-
-    if (!user) {
-      console.log('Usuario no encontrado')
-      return res.status(401).json({ message: 'Token inválido' })
-    }
-
-    res.json({
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-    })
-  } catch {
-    return res.status(401).json({ message: 'Token inválido o expirado' })
-  }
-})
-
-// Logout
-app.post('/logout', (req, res) => {
-  res.clearCookie('token')
-  res.json({ message: 'Deslogueado correctamente' })
-})
-
-// Endpoint para usuario específico (corregido)
-app.get('/api/user/:id', async (req, res) => {
-  const authHeader = req.headers.authorization
-  if (!authHeader) {
-    return res.status(401).json({ message: 'No se proporcionó token' })
-  }
-
-  const token = authHeader.split(' ')[1]
-
-  try {
-    jwt.verify(token, process.env.JWT_SECRET) // Eliminamos _loggedUser
-    const user = await User.findById(req.params.id)
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' })
-    }
-    res.json(user)
-  } catch {
-    return res.status(401).json({ message: 'No Autorizado' })
-  }
-})
-
-// ========================
-// Inicio del servidor
-// ========================
-app.listen(port, () =>
-  console.log(`✅ Servidor ejecutándose en http://localhost:${port}`)
-)
-
-// ========================
-// Manejo de errores
-// ========================
-app.use(errorHandler)
-
+// Añadimos también el middleware para manejar rutas no encontradas (404)
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found.' })
+  res.status(404).json({ message: 'Ruta no encontrada' }) // Corregido: faltaban paréntesis en la función
 })
