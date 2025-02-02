@@ -12,6 +12,8 @@
  * @param {Object} res - Objeto de la respuesta HTTP.
  * @param {Function} next - Función para pasar al siguiente middleware o controlador.
  */
+console.log('🛡️ Middleware de validación cargado') // Debug para confirmar que el middleware está activo
+
 module.exports = (req, res, next) => {
   const { username, password } = req.body
 
