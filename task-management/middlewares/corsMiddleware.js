@@ -2,19 +2,27 @@
 // Middleware para manejar CORS
 // =========================================
 const cors = require('cors')
-/**
- * Con este middleware buscamos gestionar las políticas de CORS.
- * CORS es una política de seguridad que controla cómo las aplicaciones web pueden acceder a nuestros recursos.
- * Aquí definimos qué orígenes del frontend pueden hacer solicitudes a nuestro backend,
- * qué métodos están permitidos, y permitimos el uso de cookies o tokens de autenticación con 'credentials: true'.
- */
+
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'] // Incluye el puerto 5173
 
 const corsMiddleware = cors({
-  origin: ['http://localhost:5174', 'http://localhost:3000'], // Incluye el puerto 5174
-  credentials: true, // Permitimos el envío de cookies y encabezados de autenticación (como los tokens JWT)
+  origin: (origin, callback) => {
+    console.log(`[CORS] Solicitud desde: ${origin}`) // 🚀 Debug del origen de la solicitud
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      console.log(
+        `[CORS] Origen permitido: ${origin || 'Sin origen (Postman o servidor local)'}`
+      )
+      callback(null, true)
+    } else {
+      console.error('[ERROR]: No permitido por CORS')
+      callback(new Error('No permitido por CORS'))
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200, // Asegura que las solicitudes preflight respondan correctamente
+  optionsSuccessStatus: 200,
 })
 
 module.exports = corsMiddleware

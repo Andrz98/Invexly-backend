@@ -13,15 +13,7 @@ const router = express.Router() // Instancia de router de Express
  * @name POST /auth/register
  * @function
  */
-router.post(
-  '/register',
-  (req, res, next) => {
-    console.log('📥 Solicitud recibida en /auth/register') // Debug para verificar la solicitud
-    next()
-  },
-  validateAuth,
-  register
-)
+router.post('/register', validateAuth, register)
 
 // ========================
 // Ruta: Inicio de Sesión
@@ -32,7 +24,7 @@ router.post(
  * @name POST /auth/login
  * @function
  */
-router.post('/login', validateAuth, login) // Asegúrate de incluir esta línea si usarás `login`
+router.post('/login', validateAuth, login)
 
 // ========================
 // Ruta: Cierre de Sesión
@@ -45,4 +37,4 @@ router.post('/login', validateAuth, login) // Asegúrate de incluir esta línea 
  */
 router.post('/sign-out', signOut)
 
-module.exports = router
+module.exports = router // Exporta el router

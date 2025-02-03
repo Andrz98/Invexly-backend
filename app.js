@@ -20,12 +20,10 @@ const port = process.env.PORT || 3000
 // =====================================
 // Configuración de middlewares globales
 // =====================================
-app.use(corsMiddleware)
-app.options('*', corsMiddleware) //  Añadido para manejar preflight
-app.use(handlePreflight)
-app.use(cookieParser())
-app.use(express.json())
-// Este es el orden correcto de los middlewares
+app.use(corsMiddleware) // 1️⃣ Permitir solicitudes de diferentes orígenes (CORS)
+app.use(express.json()) // 2️⃣ Habilitar parsing de JSON en el body de las solicitudes
+app.use(cookieParser()) // 3️⃣ Analizar cookies para la autenticación
+app.use(handlePreflight) // 4️⃣ Manejar solicitudes preflight (CORS para métodos OPTIONS)
 
 // =====================================
 // Conexión a la base de datos MongoDB
@@ -75,19 +73,11 @@ async function crearAdminPorDefecto() {
 // =====================================
 // Rutas de la aplicación
 // =====================================
-console.log('✅ Middleware de autenticación activo') // Debug para verificar que las rutas están activas
 app.use('/auth', authRoutes) // Rutas de autenticación
 
 // Ruta para comprobar que el sistema funciona correctamente
 app.get('/', (req, res) => {
   res.send('Hello World') // Corregido: era res.setDefaultEncoding
-})
-
-// =====================================
-// Inicio del Servidor
-// =====================================
-app.listen(port, () => {
-  console.log(`Servidor iniciado en http://localhost:${port}`)
 })
 
 // =====================================
@@ -98,4 +88,11 @@ app.use(errorHandler) // Corregido: era 'app.users', ahora es 'app.use'
 // Añadimos también el middleware para manejar rutas no encontradas (404)
 app.use((req, res) => {
   res.status(404).json({ message: 'Ruta no encontrada' })
+})
+
+// =====================================
+// Inicio del Servidor
+// =====================================
+app.listen(port, () => {
+  console.log(`Servidor iniciado en http://localhost:${port}`)
 })
