@@ -7,7 +7,7 @@ const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'] // Inc
 
 const corsMiddleware = cors({
   origin: (origin, callback) => {
-    console.log(`[CORS] Solicitud desde: ${origin}`) // 🚀 Debug del origen de la solicitud
+    console.log(`[CORS] Solicitud desde: ${origin}`) //  Debug del origen de la solicitud
 
     if (!origin || allowedOrigins.includes(origin)) {
       console.log(

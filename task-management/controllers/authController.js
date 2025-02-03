@@ -20,7 +20,7 @@ exports.login = async (req, res, next) => {
   try {
     const { email, username, password } = req.body
 
-    // ✅ Permitir login por email o username
+    //  Permitir login por email o username
     const user = await User.findOne({
       $or: [{ email }, { username }],
     })

@@ -20,10 +20,10 @@ const port = process.env.PORT || 3000
 // =====================================
 // Configuración de middlewares globales
 // =====================================
-app.use(corsMiddleware) // 1️⃣ Permitir solicitudes de diferentes orígenes (CORS)
-app.use(express.json()) // 2️⃣ Habilitar parsing de JSON en el body de las solicitudes
-app.use(cookieParser()) // 3️⃣ Analizar cookies para la autenticación
-app.use(handlePreflight) // 4️⃣ Manejar solicitudes preflight (CORS para métodos OPTIONS)
+app.use(corsMiddleware) // Permitir solicitudes de diferentes orígenes (CORS)
+app.use(express.json()) // Habilitar parsing de JSON en el body de las solicitudes
+app.use(cookieParser()) // Analizar cookies para la autenticación
+app.use(handlePreflight) // Manejar solicitudes preflight (CORS para métodos OPTIONS)
 
 // =====================================
 // Conexión a la base de datos MongoDB

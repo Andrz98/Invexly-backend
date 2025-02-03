@@ -16,7 +16,7 @@
 module.exports = (req, res, next) => {
   const { username, email, password } = req.body
 
-  // ✅ Verifica que haya al menos un identificador (username o email) y la contraseña
+  // Verifica que haya al menos un identificador (username o email) y la contraseña
   if ((!username && !email) || !password) {
     return res.status(400).json({
       error: true,
