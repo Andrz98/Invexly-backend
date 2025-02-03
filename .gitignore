@@ -6,10 +6,18 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+<<<<<<< HEAD
+=======
+
+>>>>>>> nueva
 node_modules
 dist
 dist-ssr
 *.local
+<<<<<<< HEAD
+=======
+
+>>>>>>> nueva
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -20,4 +28,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
 .ENV
+=======
+.ENV
+dbcopy.js
+user_2.js
+user copy.js
+>>>>>>> nueva

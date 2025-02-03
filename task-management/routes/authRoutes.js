@@ -1,31 +1,48 @@
-// const express = require('express') // Framework para manejar rutas y solicitudes
-// const { signIn, signOut } = require('../controllers/authController') // Controladores de autenticación
-// const validateAuth = require('../middlewares/validateAuth') // Middleware para validar datos de entrada
+const express = require('express') // Framework para manejar rutas y solicitudes
+const { register, login, signOut } = require('../controllers/authController') // Controladores de autenticación
+const validateAuth = require('../middlewares/validateAuth') // Middleware para validar datos de entrada
 
 // const router = express.Router() // Instancia de router de Express
 
 // ========================
-// Ruta: Sign In
+// Ruta: Registro de Usuario
 // ========================
-// Valida los datos enviados y procesa el inicio de sesión.
 /**
- * Ruta para el inicio de sesión (Sign In).
+ * Ruta para el registro de nuevos usuarios.
  *
- * @name POST /auth/sign-in
+ * @name POST /auth/register
  * @function
- * @memberof module:authRoutes
  */
+router.post(
+  '/register',
+  (req, res, next) => {
+    console.log('📥 Solicitud recibida en /auth/register') // Debug para verificar la solicitud
+    next()
+  },
+  validateAuth,
+  register
+)
 
 // ========================
-// Ruta: Sign Out
+// Ruta: Inicio de Sesión
 // ========================
-// Finaliza la sesión del usuario.
+/**
+ * Ruta para el inicio de sesión (Login).
+ *
+ * @name POST /auth/login
+ * @function
+ */
+router.post('/sign-in', validateAuth, signIn)
+
+// ========================
+// Ruta: Cierre de Sesión
+// ========================
 /**
  * Ruta para el cierre de sesión (Sign Out).
  *
  * @name POST /auth/sign-out
  * @function
- * @memberof module:authRoutes
  */
+router.post('/sign-out', signOut)
 
 module.exports = router // Exporta el router
