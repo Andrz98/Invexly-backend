@@ -2,7 +2,7 @@ const express = require('express') // Framework para manejar rutas y solicitudes
 const { register, login, signOut } = require('../controllers/authController') // Controladores de autenticación
 const validateAuth = require('../middlewares/validateAuth') // Middleware para validar datos de entrada
 
-// const router = express.Router() // Instancia de router de Express
+const router = express.Router() // Instancia de router de Express
 
 // ========================
 // Ruta: Registro de Usuario
@@ -32,7 +32,7 @@ router.post(
  * @name POST /auth/login
  * @function
  */
-router.post('/sign-in', validateAuth, signIn)
+router.post('/login', validateAuth, login) // Asegúrate de incluir esta línea si usarás `login`
 
 // ========================
 // Ruta: Cierre de Sesión
@@ -45,4 +45,4 @@ router.post('/sign-in', validateAuth, signIn)
  */
 router.post('/sign-out', signOut)
 
-module.exports = router // Exporta el router
+module.exports = router

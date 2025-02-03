@@ -21,7 +21,7 @@ const port = process.env.PORT || 3000
 // Configuración de middlewares globales
 // =====================================
 app.use(corsMiddleware)
-app.options('*', corsMiddleware) // 🚀 Añadido para manejar preflight
+app.options('*', corsMiddleware) //  Añadido para manejar preflight
 app.use(handlePreflight)
 app.use(cookieParser())
 app.use(express.json())
