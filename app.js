@@ -1,13 +1,15 @@
+/* eslint-disable no-unused-vars */
 // =============================================================
 // Importaciones de las dependencias necesarias para el proyecto
 // =============================================================
 const express = require('express')
 const mongoose = require('mongoose')
-const authRoutes = require('./task-management/routes/authRoutes')
+const authRoutes = require('./task-management/routes/authRoutes') // ✅ Rutas de autenticación
 const errorHandler = require('./task-management/middlewares/errorHandler')
 const corsMiddleware = require('./task-management/middlewares/corsMiddleware')
 const handlePreflight = require('./task-management/middlewares/handlePreflight')
 const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken') // Importación de JWT para la gestión de tokens
 const User = require('./models/user')
 require('dotenv').config()
 
@@ -15,7 +17,7 @@ require('dotenv').config()
 // Instancia express y puerto definido
 // ===================================
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000 // Puerto del servidor
 
 // =====================================
 // Configuración de middlewares globales
@@ -23,6 +25,15 @@ const port = process.env.PORT || 3000
 app.use(corsMiddleware) // Permitir solicitudes de diferentes orígenes (CORS)
 app.use(express.json()) // Habilitar parsing de JSON en el body de las solicitudes
 app.use(cookieParser()) // Analizar cookies para la autenticación
+
+// =====================================
+// Middleware para depurar cookies recibidas
+// =====================================
+app.use((req, res, next) => {
+  console.log('Cookies recibidas:', req.cookies) // Registro de las cookies en cada solicitud
+  next() // Permite que la solicitud continúe hacia el siguiente middleware o ruta
+})
+
 app.use(handlePreflight) // Manejar solicitudes preflight (CORS para métodos OPTIONS)
 
 // =====================================
@@ -33,12 +44,12 @@ const dbConectar = process.env.MONGO_URI
 mongoose
   .connect(dbConectar, {})
   .then(() => {
-    console.log('✅ Conexión a MongoDB establecida')
+    console.log('Conexión a MongoDB establecida')
     crearAdminPorDefecto() // Llamamos la función después de la conexión exitosa
   })
   .catch((error) => {
     if (process.env.NODE_ENV === 'development') {
-      console.error('❌ Error de conexión a MongoDB:', error) // Solo lo mostramos en modo desarrollo
+      console.error('Error de conexión a MongoDB:', error) // Solo lo mostramos en modo desarrollo
     }
     process.exit(1) // Finaliza la aplicación si la conexión falla
   })
@@ -57,15 +68,15 @@ async function crearAdminPorDefecto() {
         role: 'admin', // Asignamos el rol de administrador de forma automática
       })
       await admin.save() // Guardamos el admin en la base de datos
-      console.log('✅ Admin creado con éxito')
+      console.log('Admin creado con éxito')
     } else {
       console.log(
-        '✅ Admin ya existe en la base de datos, no se ha creado uno nuevo'
+        'Admin ya existe en la base de datos, no se ha creado uno nuevo'
       )
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('❌ Error al crear el administrador:', error) // Solo mostramos el error en modo desarrollo
+      console.error('Error al crear el administrador:', error) // Solo mostramos el error en modo desarrollo
     }
   }
 }
@@ -73,26 +84,26 @@ async function crearAdminPorDefecto() {
 // =====================================
 // Rutas de la aplicación
 // =====================================
-app.use('/auth', authRoutes) // Rutas de autenticación
+app.use('/auth', authRoutes) // ✅ Rutas de autenticación
 
 // Ruta para comprobar que el sistema funciona correctamente
 app.get('/', (req, res) => {
-  res.send('Hello World') // Corregido: era res.setDefaultEncoding
+  res.send('Hello World') // Respuesta simple para verificar que el servidor funciona
 })
 
 // =====================================
 // Middleware Global de Manejo de Errores
 // =====================================
-app.use(errorHandler) // Corregido: era 'app.users', ahora es 'app.use'
+app.use(errorHandler) // Middleware para manejar errores globalmente
 
-// Añadimos también el middleware para manejar rutas no encontradas (404)
+// Middleware para manejar rutas no encontradas (404)
 app.use((req, res) => {
-  res.status(404).json({ message: 'Ruta no encontrada' })
+  res.status(404).json({ message: 'Ruta no encontrada' }) // Respuesta si la ruta no existe
 })
 
 // =====================================
 // Inicio del Servidor
 // =====================================
 app.listen(port, () => {
-  console.log(`Servidor iniciado en http://localhost:${port}`)
+  console.log(`Servidor iniciado en http://localhost:${port}`) // Mensaje de confirmación en la consola
 })

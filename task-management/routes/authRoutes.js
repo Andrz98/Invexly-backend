@@ -1,6 +1,16 @@
+// =========================================
+// Rutas para la Autenticación de Usuarios
+// =========================================
+
 const express = require('express') // Framework para manejar rutas y solicitudes
-const { register, login, signOut } = require('../controllers/authController') // Controladores de autenticación
+const {
+  register,
+  login,
+  signOut,
+  validateToken,
+} = require('../controllers/authController') // Importación de los controladores de autenticación
 const validateAuth = require('../middlewares/validateAuth') // Middleware para validar datos de entrada
+const authenticateToken = require('../middlewares/authenticateToken') // Middleware para autenticar tokens JWT
 
 const router = express.Router() // Instancia de router de Express
 
@@ -27,6 +37,18 @@ router.post('/register', validateAuth, register)
 router.post('/login', validateAuth, login)
 
 // ========================
+// Ruta: Validación de Token
+// ========================
+/**
+ * Ruta para validar la autenticación del token JWT.
+ * Solo los tokens válidos podrán acceder a esta ruta.
+ *
+ * @name GET /auth/validate-token
+ * @function
+ */
+router.get('/validate-token', authenticateToken, validateToken)
+
+// ========================
 // Ruta: Cierre de Sesión
 // ========================
 /**
@@ -37,4 +59,4 @@ router.post('/login', validateAuth, login)
  */
 router.post('/sign-out', signOut)
 
-module.exports = router // Exporta el router
+module.exports = router // Exporta el router para ser utilizado en app.js

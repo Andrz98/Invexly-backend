@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const User = require('../../models/user') // Importación del modelo de usuario
 const jwt = require('jsonwebtoken') // Librería para generar y verificar tokens JWT
 const bcrypt = require('bcrypt') // Librería para encriptar y comparar contraseñas
@@ -9,37 +10,31 @@ const bcrypt = require('bcrypt') // Librería para encriptar y comparar contrase
  * Controlador para el inicio de sesión (Login).
  *
  * @param {Object} req - Objeto de la solicitud HTTP.
- * @param {Object} req.body - Contiene los datos enviados en la solicitud.
- * @param {string} [req.body.email] - Correo electrónico del usuario.
- * @param {string} [req.body.username] - Nombre de usuario.
- * @param {string} req.body.password - Contraseña del usuario.
  * @param {Object} res - Objeto de la respuesta HTTP.
- * @param {Function} next - Función para manejar errores.
  */
 exports.login = async (req, res, next) => {
   try {
     const { email, username, password } = req.body
 
-    //  Permitir login por email o username
-    const user = await User.findOne({
-      $or: [{ email }, { username }],
-    })
-
+    const user = await User.findOne({ $or: [{ email }, { username }] }) // Busca al usuario por email o nombre de usuario
     if (!user) {
-      const error = new Error('Usuario no encontrado')
-      error.status = 401
-      throw error
+      return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password) // Verifica la contraseña encriptada
     if (!isMatch) {
-      const error = new Error('Contraseña incorrecta')
-      error.status = 401
-      throw error
+      return res.status(401).json({ message: 'Contraseña incorrecta' })
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
+      expiresIn: '7d', // Token válido por 7 días
+    })
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Duración de 7 días en milisegundos
     })
 
     res.json({
@@ -60,12 +55,7 @@ exports.login = async (req, res, next) => {
  * Controlador para el registro de nuevos usuarios.
  *
  * @param {Object} req - Objeto de la solicitud HTTP.
- * @param {Object} req.body - Contiene los datos enviados en la solicitud.
- * @param {string} req.body.username - Nombre de usuario.
- * @param {string} req.body.email - Correo electrónico del usuario.
- * @param {string} req.body.password - Contraseña del usuario.
  * @param {Object} res - Objeto de la respuesta HTTP.
- * @param {Function} next - Función para manejar errores.
  */
 exports.register = async (req, res, next) => {
   try {
@@ -73,12 +63,10 @@ exports.register = async (req, res, next) => {
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] })
     if (existingUser) {
-      const error = new Error('El usuario ya está registrado')
-      error.status = 400
-      throw error
+      return res.status(400).json({ message: 'El usuario ya está registrado' })
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10) // Encriptación de la contraseña
     const newUser = new User({
       username,
       email,
@@ -89,7 +77,7 @@ exports.register = async (req, res, next) => {
     await newUser.save()
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
+      expiresIn: '7d',
     })
 
     res.status(201).json({
@@ -104,6 +92,35 @@ exports.register = async (req, res, next) => {
 }
 
 // ========================
+// Controlador: Validación del Token
+// ========================
+/**
+ * Controlador para validar el token JWT.
+ *
+ * @param {Object} req - Objeto de la solicitud HTTP.
+ * @param {Object} res - Objeto de la respuesta HTTP.
+ */
+exports.validateToken = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id) // Información del usuario obtenida del token
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: 'Token inválido o usuario no encontrado' })
+    }
+
+    res.json({
+      message: 'Token válido',
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    })
+  } catch (error) {
+    res.status(500).json({ message: 'Error al validar el token' })
+  }
+}
+
+// ========================
 // Controlador: Cierre de Sesión
 // ========================
 /**
@@ -113,5 +130,6 @@ exports.register = async (req, res, next) => {
  * @param {Object} res - Objeto de la respuesta HTTP.
  */
 exports.signOut = (req, res) => {
+  res.clearCookie('token') // Elimina la cookie para cerrar sesión
   res.json({ message: 'Sesión cerrada con éxito' })
 }
