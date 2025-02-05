@@ -73,14 +73,13 @@ El problema principal era que el usuario perdía la sesión activa después de r
 
 # Completar el archivo Markdown incluyendo la segunda parte
 
-corrected_markdown += """
 # Nuevas Notas de los Cambios Realizados
 
 ## Patch 1.2
 
-# 📦 Documentación de Cambios: Backend
+# Documentación de Cambios: Backend
 
-## 🚩 Problema Inicial
+## Problema Inicial
 
 El problema principal era que el usuario perdía la sesión activa después de recargar la página. Esto ocurría porque no existía una lógica en el backend que permitiera validar el token JWT guardado en el navegador del usuario.
 
@@ -186,4 +185,3 @@ file_path = '/mnt/data/Documentacion_Backend_TFM_Project_Completo.md'
 with open(file_path, 'w') as file:
     file.write(corrected_markdown)
 
-file_path
