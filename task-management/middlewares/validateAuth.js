@@ -3,8 +3,7 @@
 // ========================
 // Asegura que los datos enviados sean válidos antes de procesarlos.
 /**
- * Middleware para validar los datos de autenticación en las solicitudes.
- *@param {Function} req
+ * Middleware para validar los datos de autenticación en las solicitudes.git 
  * @param {Object} req - Objeto de la solicitud HTTP.
  * @param {Object} req.body - Contiene los datos enviados en la solicitud.
  * @param {string} [req.body.username] - Nombre de usuario (opcional si se usa email).
