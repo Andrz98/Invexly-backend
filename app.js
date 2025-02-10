@@ -1,10 +1,9 @@
-/* eslint-disable no-unused-vars */
 // =============================================================
 // Importaciones de las dependencias necesarias para el proyecto
 // =============================================================
 const express = require('express')
-const mongoose = require('mongoose')
-const authRoutes = require('./task-management/routes/authRoutes') // ✅ Rutas de autenticación
+const connectDB = require('./task-management/config/db')
+const authRoutes = require('./task-management/routes/authRoutes')
 const errorHandler = require('./task-management/middlewares/errorHandler')
 const corsMiddleware = require('./task-management/middlewares/corsMiddleware')
 const handlePreflight = require('./task-management/middlewares/handlePreflight')
@@ -17,7 +16,7 @@ require('dotenv').config()
 // Instancia express y puerto definido
 // ===================================
 const app = express()
-const port = process.env.PORT || 3000 // Puerto del servidor
+const port = process.env.PORT || 3000
 
 // =====================================
 // Configuración de middlewares globales
@@ -39,19 +38,13 @@ app.use(handlePreflight) // Manejar solicitudes preflight (CORS para métodos OP
 // =====================================
 // Conexión a la base de datos MongoDB
 // =====================================
-const dbConectar = process.env.MONGO_URI
-
-mongoose
-  .connect(dbConectar, {})
+connectDB()
   .then(() => {
-    console.log('Conexión a MongoDB establecida')
     crearAdminPorDefecto() // Llamamos la función después de la conexión exitosa
   })
   .catch((error) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error de conexión a MongoDB:', error) // Solo lo mostramos en modo desarrollo
-    }
-    process.exit(1) // Finaliza la aplicación si la conexión falla
+    console.error('❌ Error al conectar con MongoDB:', error)
+    process.exit(1) // Cerrar la aplicación en caso de error
   })
 
 // ==============================================
@@ -84,7 +77,7 @@ async function crearAdminPorDefecto() {
 // =====================================
 // Rutas de la aplicación
 // =====================================
-app.use('/auth', authRoutes) // ✅ Rutas de autenticación
+app.use('/auth', authRoutes) // Rutas de autenticación
 
 // Ruta para comprobar que el sistema funciona correctamente
 app.get('/', (req, res) => {
