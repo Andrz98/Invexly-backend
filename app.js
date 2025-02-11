@@ -10,6 +10,7 @@ const handlePreflight = require('./task-management/middlewares/handlePreflight')
 const cookieParser = require('cookie-parser')
 const jwt = require('jsonwebtoken') // Importación de JWT para la gestión de tokens
 const User = require('./models/user')
+const bcrypt = require('bcrypt') // Para el cifrado de contraseñas
 require('dotenv').config()
 
 // ===================================
@@ -39,8 +40,9 @@ app.use(handlePreflight) // Manejar solicitudes preflight (CORS para métodos OP
 // Conexión a la base de datos MongoDB
 // =====================================
 connectDB()
-  .then(() => {
-    crearAdminPorDefecto() // Llamamos la función después de la conexión exitosa
+  .then(async () => {
+    console.log('✅ Conexión a MongoDB establecida')
+    await crearAdminPorDefecto() // Llamamos la función después de la conexión exitosa
   })
   .catch((error) => {
     console.error('❌ Error al conectar con MongoDB:', error)
@@ -52,24 +54,44 @@ connectDB()
 // ==============================================
 async function crearAdminPorDefecto() {
   try {
-    const existingAdmin = await User.findOne({ role: 'admin' }) // Verificamos si ya hay un admin
+    console.log(' Verificando la existencia del usuario administrador...')
+
+    // Verificamos si el usuario administrador ya existe
+    const existingAdmin = await User.findOne({ role: 'admin' })
     if (!existingAdmin) {
+      console.log(' Creando usuario administrador...')
+
+      // Verificamos si las variables de entorno están bien cargadas
+      if (
+        !process.env.ADMIN_EMAIL ||
+        !process.env.ADMIN_PASSWORD ||
+        !process.env.ADMIN_USERNAME
+      ) {
+        console.error(
+          '❌ ERROR: Faltan variables de entorno para el administrador'
+        )
+        return
+      }
+
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10) // Encriptación de la contraseña
+
       const admin = new User({
-        username: process.env.ADMIN_USERNAME || 'Admin',
+        username: process.env.ADMIN_USERNAME,
         email: process.env.ADMIN_EMAIL,
-        password: process.env.ADMIN_PASSWORD,
-        role: 'admin', // Asignamos el rol de administrador de forma automática
+        password: hashedPassword, // La contraseña del admin se guarda cifrada para que no se pueda ver con las herramientas de desarrollador del browser.
+        role: 'admin',
       })
+
       await admin.save() // Guardamos el admin en la base de datos
-      console.log('Admin creado con éxito')
+      console.log('✅ Usuario administrador creado con éxito')
     } else {
       console.log(
-        'Admin ya existe en la base de datos, no se ha creado uno nuevo'
+        '⚠️ Admin ya existe en la base de datos, no se ha creado uno nuevo'
       )
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Error al crear el administrador:', error) // Solo mostramos el error en modo desarrollo
+      console.error('❌ Error al crear el administrador:', error) // Solo mostramos el error en modo desarrollo
     }
   }
 }
@@ -98,5 +120,5 @@ app.use((req, res) => {
 // Inicio del Servidor
 // =====================================
 app.listen(port, () => {
-  console.log(`Servidor iniciado en http://localhost:${port}`) // Mensaje de confirmación en la consola
+  console.log(`🚀 Servidor iniciado en http://localhost:${port}`) // Mensaje de confirmación en la consola
 })

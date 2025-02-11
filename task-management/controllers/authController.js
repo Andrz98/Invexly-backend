@@ -21,7 +21,7 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
-    const isMatch = await bcrypt.compare(password, user.password) // Verifica la contraseña encriptada
+    const isMatch = await bcrypt.compare(password, user.password) // Esta linea compara la contraseña ingresada con la almacenada en la base de datos
     if (!isMatch) {
       return res.status(401).json({ message: 'Contraseña incorrecta' })
     }
