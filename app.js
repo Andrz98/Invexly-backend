@@ -1,17 +1,24 @@
 // =============================================================
 // Importaciones de las dependencias necesarias para el proyecto
 // =============================================================
-const express = require('express')
-const connectDB = require('./task-management/config/db')
-const authRoutes = require('./task-management/routes/authRoutes')
-const errorHandler = require('./task-management/middlewares/errorHandler')
-const corsMiddleware = require('./task-management/middlewares/corsMiddleware')
-const handlePreflight = require('./task-management/middlewares/handlePreflight')
-const cookieParser = require('cookie-parser')
-const jwt = require('jsonwebtoken') // Importación de JWT para la gestión de tokens
-const User = require('./models/user')
-const bcrypt = require('bcrypt') // Para el cifrado de contraseñas
-require('dotenv').config()
+import express from 'express'
+import connectDB from './task-management/config/db.js'
+import authRoutes from './task-management/routes/authRoutes.js'
+import errorHandler from './task-management/middlewares/errorHandler.js'
+import corsMiddleware from './task-management/middlewares/corsMiddleware.js'
+import handlePreflight from './task-management/middlewares/handlePreflight.js'
+import cookieParser from 'cookie-parser'
+import bcrypt from 'bcrypt'
+import dotenv from 'dotenv'
+import User from './models/user.js'
+
+dotenv.config()
+
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // ===================================
 // Instancia express y puerto definido
@@ -42,11 +49,11 @@ app.use(handlePreflight) // Manejar solicitudes preflight (CORS para métodos OP
 connectDB()
   .then(async () => {
     console.log('✅ Conexión a MongoDB establecida')
-    await crearAdminPorDefecto() // Llamamos la función después de la conexión exitosa
+    await crearAdminPorDefecto()
   })
   .catch((error) => {
     console.error('❌ Error al conectar con MongoDB:', error)
-    process.exit(1) // Cerrar la aplicación en caso de error
+    process.exit(1)
   })
 
 // ==============================================
@@ -55,13 +62,9 @@ connectDB()
 async function crearAdminPorDefecto() {
   try {
     console.log(' Verificando la existencia del usuario administrador...')
-
-    // Verificamos si el usuario administrador ya existe
     const existingAdmin = await User.findOne({ role: 'admin' })
     if (!existingAdmin) {
       console.log(' Creando usuario administrador...')
-
-      // Verificamos si las variables de entorno están bien cargadas
       if (
         !process.env.ADMIN_EMAIL ||
         !process.env.ADMIN_PASSWORD ||
@@ -72,17 +75,14 @@ async function crearAdminPorDefecto() {
         )
         return
       }
-
-      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10) // Encriptación de la contraseña
-
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10)
       const admin = new User({
         username: process.env.ADMIN_USERNAME,
         email: process.env.ADMIN_EMAIL,
-        password: hashedPassword, // La contraseña del admin se guarda cifrada para que no se pueda ver con las herramientas de desarrollador del browser.
+        password: hashedPassword,
         role: 'admin',
       })
-
-      await admin.save() // Guardamos el admin en la base de datos
+      await admin.save()
       console.log('✅ Usuario administrador creado con éxito')
     } else {
       console.log(
@@ -91,7 +91,7 @@ async function crearAdminPorDefecto() {
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('❌ Error al crear el administrador:', error) // Solo mostramos el error en modo desarrollo
+      console.error('❌ Error al crear el administrador:', error)
     }
   }
 }
@@ -99,26 +99,27 @@ async function crearAdminPorDefecto() {
 // =====================================
 // Rutas de la aplicación
 // =====================================
-app.use('/auth', authRoutes) // Rutas de autenticación
+app.use('/auth', authRoutes)
 
 // Ruta para comprobar que el sistema funciona correctamente
 app.get('/', (req, res) => {
-  res.send('Hello World') // Respuesta simple para verificar que el servidor funciona
+  res.send('Hello World')
 })
 
 // =====================================
 // Middleware Global de Manejo de Errores
 // =====================================
-app.use(errorHandler) // Middleware para manejar errores globalmente
+app.use(errorHandler)
 
-// Middleware para manejar rutas no encontradas (404)
 app.use((req, res) => {
-  res.status(404).json({ message: 'Ruta no encontrada' }) // Respuesta si la ruta no existe
+  res.status(404).json({ message: 'Ruta no encontrada' })
 })
 
 // =====================================
 // Inicio del Servidor
 // =====================================
 app.listen(port, () => {
-  console.log(`🚀 Servidor iniciado en http://localhost:${port}`) // Mensaje de confirmación en la consola
+  console.log(`🚀 Servidor iniciado en http://localhost:${port}`)
 })
+
+export default app

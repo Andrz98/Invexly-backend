@@ -4,7 +4,7 @@
 
 const handlePreflight = (req, res, next) => {
   if (req.method === 'OPTIONS') {
-    console.log('[Preflight] Solicitud OPTIONS recibida') // 🚀 Debug para solicitudes preflight
+    console.log('[Preflight] Solicitud OPTIONS recibida')
 
     res.header(
       'Access-Control-Allow-Methods',
@@ -18,10 +18,10 @@ const handlePreflight = (req, res, next) => {
       console.log(`[Preflight] Origen permitido en preflight: ${origin}`)
     }
 
-    return res.sendStatus(200) // Finaliza la respuesta para OPTIONS
+    return res.sendStatus(200)
   }
 
   next()
 }
 
-module.exports = handlePreflight
+export default handlePreflight

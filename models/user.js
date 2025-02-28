@@ -1,6 +1,8 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
+// =========================================
 // Definición del esquema para los usuarios
+// =========================================
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -25,5 +27,7 @@ const userSchema = new mongoose.Schema({
   },
 })
 
-// Exportamos el modelo para interactuar con MongoDB
-module.exports = mongoose.model('User', userSchema)
+// =========================================
+// Exportación del modelo de usuario
+// =========================================
+export default mongoose.model('User', userSchema)

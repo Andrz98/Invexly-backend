@@ -2,6 +2,7 @@
   "name": "tfmbackendverde",
   "version": "1.0.0",
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "nodemon app.js",
     "lint": "eslint .",
