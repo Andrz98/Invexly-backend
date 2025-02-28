@@ -1,9 +1,15 @@
+// =========================================
+// Rutas para la Autenticación de Usuarios y Perfil
+// =========================================
+
 import express from 'express'
+import multer from 'multer'
 import {
   register,
   login,
   signOut,
   validateToken,
+  updateProfile
 } from '../controllers/authController.js'
 import validateAuth from '../middlewares/validateAuth.js'
 import authenticateToken from '../middlewares/authenticateToken.js'
@@ -11,23 +17,22 @@ import authenticateToken from '../middlewares/authenticateToken.js'
 const router = express.Router()
 
 // ========================
-// Ruta: Registro de Usuario
+// Configuración de `multer` para manejar imágenes
+// ========================
+const storage = multer.memoryStorage()
+const upload = multer({ storage })
+
+// ========================
+// Rutas de Autenticación
 // ========================
 router.post('/register', validateAuth, register)
-
-// ========================
-// Ruta: Inicio de Sesión
-// ========================
 router.post('/login', validateAuth, login)
-
-// ========================
-// Ruta: Validación de Token
-// ========================
 router.get('/validate-token', authenticateToken, validateToken)
+router.post('/sign-out', signOut)
 
 // ========================
-// Ruta: Cierre de Sesión
+// Ruta: Actualización de Perfil
 // ========================
-router.post('/sign-out', signOut)
+router.put('/profile', authenticateToken, upload.single('profileImage'), updateProfile)
 
 export default router

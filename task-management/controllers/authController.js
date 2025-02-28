@@ -1,10 +1,11 @@
 // =========================================
-// Controladores de Autenticación
+// Controladores de Autenticación y Perfil de Usuario
 // =========================================
 
 import User from '../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import cloudinary from '../config/cloudinary.js'
 
 // ========================
 // Controlador: Inicio de Sesión
@@ -113,4 +114,99 @@ export const validateToken = async (req, res) => {
 export const signOut = (req, res) => {
   res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'lax' })
   res.status(200).json({ message: 'Sesión cerrada con éxito' })
+}
+
+// ========================
+// Controlador: Actualización de Perfil
+// ========================
+export const updateProfile = async (req, res) => {
+  try {
+    const { username, email, currentPassword, newPassword } = req.body
+    const userId = req.user.id
+
+    // ========================
+    // Validaciones de Email y Username
+    // ========================
+    if (email) {
+      const emailExists = await User.findOne({ email })
+      if (emailExists && emailExists._id.toString() !== userId) {
+        return res.status(400).json({ message: 'El email ya está en uso.' })
+      }
+    }
+
+    if (username) {
+      const usernameExists = await User.findOne({ username })
+      if (usernameExists && usernameExists._id.toString() !== userId) {
+        return res.status(400).json({ message: 'El username ya está en uso.' })
+      }
+    }
+
+    // ========================
+    // Manejo de Cambio de Contraseña con Validación
+    // ========================
+    const user = await User.findById(userId)
+
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          message: 'Debes proporcionar la contraseña actual para cambiarla.',
+        })
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password)
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ message: 'La contraseña actual es incorrecta.' })
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          message: 'La nueva contraseña debe tener al menos 6 caracteres.',
+        })
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+      user.password = hashedPassword
+    }
+
+    // ========================
+    // Manejo de Imagen de Perfil en Cloudinary
+    // ========================
+    if (req.file) {
+      if (user.profileImage && !user.profileImage.startsWith('http')) {
+        await cloudinary.uploader.destroy(`profile_${userId}`)
+      }
+
+      const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'user_profiles',
+        public_id: `profile_${userId}`,
+        overwrite: true,
+      })
+
+      if (uploadedImage.secure_url) {
+        user.profileImage = uploadedImage.secure_url
+      } else {
+        return res
+          .status(500)
+          .json({ message: 'Error al subir la imagen a Cloudinary' })
+      }
+    }
+
+    if (username) user.username = username
+    if (email) user.email = email
+
+    await user.save()
+
+    res.json({
+      message: 'Perfil actualizado con éxito.',
+      username: user.username,
+      email: user.email,
+      profileImage: user.profileImage,
+    })
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Error al actualizar el perfil.', error: error.message })
+  }
 }
