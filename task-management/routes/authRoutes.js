@@ -1,7 +1,3 @@
-// =========================================
-// Rutas para la Autenticación de Usuarios
-// =========================================
-
 import express from 'express'
 import {
   register,

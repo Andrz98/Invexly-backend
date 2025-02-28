@@ -87,11 +87,13 @@ export const register = async (req, res, next) => {
 // ========================
 export const validateToken = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Token inválido o expirado' })
+    }
+
     const user = await User.findById(req.user.id)
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: 'Token inválido o usuario no encontrado' })
+      return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
     res.json({
@@ -109,6 +111,6 @@ export const validateToken = async (req, res) => {
 // Controlador: Cierre de Sesión
 // ========================
 export const signOut = (req, res) => {
-  res.clearCookie('token')
-  res.json({ message: 'Sesión cerrada con éxito' })
+  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'lax' })
+  res.status(200).json({ message: 'Sesión cerrada con éxito' })
 }
