@@ -5,7 +5,7 @@ const testCloudinary = async () => {
     const result = await cloudinary.uploader.upload(
       'https://res.cloudinary.com/demo/image/upload/sample.jpg',
       {
-        folder: 'test_uploads',
+        folder: 'test_uploads'
       }
     )
     console.log('✅ Cloudinary conectado correctamente:')

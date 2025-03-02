@@ -72,7 +72,7 @@ async function crearAdminPorDefecto() {
         username: process.env.ADMIN_USERNAME,
         email: process.env.ADMIN_EMAIL,
         password: hashedPassword,
-        role: 'admin',
+        role: 'admin'
       })
       await admin.save()
       console.log('✅ Usuario administrador creado con éxito')

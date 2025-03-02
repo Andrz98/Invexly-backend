@@ -1,6 +1,7 @@
 # Guardar el contenido corregido en un archivo Markdown
 
 corrected_markdown = """
+
 # Documentación del Backend - TFM Project
 
 ## 1. Configuración del Proyecto
@@ -130,19 +131,19 @@ Este middleware verifica si el token enviado desde el cliente es válido:
 const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {
-  const token = req.cookies.token;
+const token = req.cookies.token;
 
-  if (!token) {
-    return res.status(401).json({ message: 'Token no proporcionado' });
-  }
+if (!token) {
+return res.status(401).json({ message: 'Token no proporcionado' });
+}
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Token inválido o expirado' });
-    }
-    req.user = user; // Adjunta la información del usuario a la solicitud
-    next();
-  });
+jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+if (err) {
+return res.status(403).json({ message: 'Token inválido o expirado' });
+}
+req.user = user; // Adjunta la información del usuario a la solicitud
+next();
+});
 };
 
 module.exports = authenticateToken;
@@ -154,10 +155,10 @@ Se añadió la función `validateToken` para manejar la validación del token:
 
 \`\`\`
 exports.validateToken = (req, res) => {
-  res.status(200).json({
-    message: 'Token válido',
-    user: req.user, // Devuelve la información del usuario si el token es válido
-  });
+res.status(200).json({
+message: 'Token válido',
+user: req.user, // Devuelve la información del usuario si el token es válido
+});
 };
 \`\`\`
 
@@ -167,10 +168,10 @@ Se respeta la configuración inicial proporcionada por Javier. El único cambio 
 
 \`\`\`javascript
 res.cookie('token', token, {
-  httpOnly: true, // Solo accesible desde el servidor
-  secure: process.env.NODE_ENV === 'production', // Solo en HTTPS en producción
-  sameSite: 'lax', // Previene ataques CSRF
-  maxAge: 7 * 24 * 60 * 60 * 1000, // Token válido por 7 días
+httpOnly: true, // Solo accesible desde el servidor
+secure: process.env.NODE_ENV === 'production', // Solo en HTTPS en producción
+sameSite: 'lax', // Previene ataques CSRF
+maxAge: 7 _ 24 _ 60 _ 60 _ 1000, // Token válido por 7 días
 });
 \`\`\`
 
@@ -178,10 +179,10 @@ res.cookie('token', token, {
 
 - **Antes:** No existía un mecanismo para validar la sesión de usuario en cada recarga.
 - **Ahora:** La ruta `/auth/validate-token` y el middleware `authenticateToken` permiten verificar automáticamente si la sesión sigue activa de forma segura.
-"""
+  """
 
 # Guardar el archivo completo actualizado
+
 file_path = '/mnt/data/Documentacion_Backend_TFM_Project_Completo.md'
 with open(file_path, 'w') as file:
-    file.write(corrected_markdown)
-
+file.write(corrected_markdown)

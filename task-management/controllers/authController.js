@@ -5,12 +5,10 @@
 import User from '../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import cloudinary from '../config/cloudinary.js'
 
 // =========================================
 // Controlador: Inicio de Sesión (Corrección aplicada)
 // =========================================
-
 export const login = async (req, res, next) => {
   try {
     console.log('Datos recibidos en login:', req.body)
@@ -44,7 +42,7 @@ export const login = async (req, res, next) => {
     // Generar token JWT
     // ========================
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+      expiresIn: '7d'
     })
 
     // ========================
@@ -54,7 +52,7 @@ export const login = async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000
     })
 
     // ========================
@@ -64,7 +62,7 @@ export const login = async (req, res, next) => {
       message: 'Inicio de sesión exitoso',
       token,
       username: user.username,
-      email: user.email,
+      email: user.email
     })
   } catch (error) {
     console.error('❌ Error en login:', error)
@@ -89,20 +87,20 @@ export const register = async (req, res, next) => {
       username,
       email,
       password: hashedPassword,
-      role: 'user',
+      role: 'user'
     })
 
     await newUser.save()
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+      expiresIn: '7d'
     })
 
     res.status(201).json({
       message: 'Usuario registrado con éxito',
       token,
       username: newUser.username,
-      email: newUser.email,
+      email: newUser.email
     })
   } catch (error) {
     next(error)
@@ -127,10 +125,13 @@ export const validateToken = async (req, res) => {
       message: 'Token válido',
       username: user.username,
       email: user.email,
-      role: user.role,
+      role: user.role
     })
   } catch (error) {
-    res.status(500).json({ message: 'Error al validar el token' })
+    res.status(500).json({
+      message: 'Error al actualizar el perfil.',
+      error: error.message
+    })
   }
 }
 
@@ -161,7 +162,7 @@ export const getProfile = async (req, res) => {
       username: user.username,
       email: user.email,
       role: user.role,
-      profileImage: user.profileImage,
+      profileImage: user.profileImage
     })
   } catch (error) {
     res
@@ -177,6 +178,12 @@ export const updateProfile = async (req, res) => {
   try {
     const { username, email, currentPassword, newPassword } = req.body
     const userId = req.user.id
+
+    // ✅ Se obtiene el usuario de la BD antes de modificarlo
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
 
     // ========================
     // Validaciones de Email y Username
@@ -195,8 +202,40 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    if (username) user.username = username
-    if (email) user.email = email
+    // ========================
+    // Manejo de Cambio de Contraseña con Validación
+    // ========================
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          message: 'Debes proporcionar la contraseña actual para cambiarla.'
+        })
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password)
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ message: 'La contraseña actual es incorrecta.' })
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          message: 'La nueva contraseña debe tener al menos 6 caracteres.'
+        })
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+      user.password = hashedPassword
+    }
+
+    // ✅ Aplicar cambios al usuario
+    if (username) {
+      user.username = username
+    }
+    if (email) {
+      user.email = email
+    }
 
     await user.save()
 
@@ -204,7 +243,7 @@ export const updateProfile = async (req, res) => {
       message: 'Perfil actualizado con éxito.',
       username: user.username,
       email: user.email,
-      profileImage: user.profileImage,
+      profileImage: user.profileImage
     })
   } catch (error) {
     res

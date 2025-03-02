@@ -6,7 +6,7 @@ import {
   logout, // ✅ Nombre correcto de la función
   validateToken,
   updateProfile,
-  getProfile, // <-- Se añade el controlador de perfil
+  getProfile // <-- Se añade el controlador de perfil
 } from '../controllers/authController.js'
 import validateAuth from '../middlewares/validateAuth.js'
 import authenticateToken from '../middlewares/authenticateToken.js'

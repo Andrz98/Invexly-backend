@@ -9,7 +9,7 @@ const validateAuth = (req, res, next) => {
     return res.status(400).json({
       error: true,
       message:
-        'El usuario o el correo electrónico y la contraseña son obligatorios',
+        'El usuario o el correo electrónico y la contraseña son obligatorios'
     })
   }
 
