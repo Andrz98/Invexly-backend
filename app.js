@@ -2,23 +2,17 @@
 // Importaciones de las dependencias necesarias para el proyecto
 // =============================================================
 import express from 'express'
+import dotenv from 'dotenv'
 import connectDB from './task-management/config/db.js'
 import authRoutes from './task-management/routes/authRoutes.js'
 import errorHandler from './task-management/middlewares/errorHandler.js'
 import corsMiddleware from './task-management/middlewares/corsMiddleware.js'
 import handlePreflight from './task-management/middlewares/handlePreflight.js'
-import cookieParser from 'cookie-parser'
-import bcrypt from 'bcrypt'
-import dotenv from 'dotenv'
+import applyMiddlewares from './task-management/middlewares/expressMiddleware.js'
 import User from './models/user.js'
+import bcrypt from 'bcrypt'
 
 dotenv.config()
-
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 // ===================================
 // Instancia express y puerto definido
@@ -27,21 +21,19 @@ const app = express()
 const port = process.env.PORT || 3000
 
 // =====================================
-// Configuración de middlewares globales
+// Aplicación de middlewares globales
 // =====================================
-app.use(corsMiddleware) // Permitir solicitudes de diferentes orígenes (CORS)
-app.use(express.json()) // Habilitar parsing de JSON en el body de las solicitudes
-app.use(cookieParser()) // Analizar cookies para la autenticación
+applyMiddlewares(app) // Aplica middlewares generales
+app.use(corsMiddleware) // Aplica CORS antes de definir rutas
+app.use(handlePreflight) // Manejar solicitudes preflight (CORS OPTIONS)
 
 // =====================================
 // Middleware para depurar cookies recibidas
 // =====================================
 app.use((req, res, next) => {
-  console.log('Cookies recibidas:', req.cookies) // Registro de las cookies en cada solicitud
-  next() // Permite que la solicitud continúe hacia el siguiente middleware o ruta
+  console.log('Cookies recibidas:', req.cookies) // Registro de cookies en cada solicitud
+  next()
 })
-
-app.use(handlePreflight) // Manejar solicitudes preflight (CORS para métodos OPTIONS)
 
 // =====================================
 // Conexión a la base de datos MongoDB
@@ -61,10 +53,10 @@ connectDB()
 // ==============================================
 async function crearAdminPorDefecto() {
   try {
-    console.log(' Verificando la existencia del usuario administrador...')
+    console.log('Verificando la existencia del usuario administrador...')
     const existingAdmin = await User.findOne({ role: 'admin' })
     if (!existingAdmin) {
-      console.log(' Creando usuario administrador...')
+      console.log('Creando usuario administrador...')
       if (
         !process.env.ADMIN_EMAIL ||
         !process.env.ADMIN_PASSWORD ||

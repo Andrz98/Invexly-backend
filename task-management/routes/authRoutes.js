@@ -7,9 +7,9 @@ import multer from 'multer'
 import {
   register,
   login,
-  signOut,
   validateToken,
-  updateProfile
+  updateProfile,
+  logout,
 } from '../controllers/authController.js'
 import validateAuth from '../middlewares/validateAuth.js'
 import authenticateToken from '../middlewares/authenticateToken.js'
@@ -28,11 +28,16 @@ const upload = multer({ storage })
 router.post('/register', validateAuth, register)
 router.post('/login', validateAuth, login)
 router.get('/validate-token', authenticateToken, validateToken)
-router.post('/sign-out', signOut)
+router.post('/logout', logout)
 
 // ========================
 // Ruta: Actualización de Perfil
 // ========================
-router.put('/profile', authenticateToken, upload.single('profileImage'), updateProfile)
+router.put(
+  '/profile',
+  authenticateToken,
+  upload.single('profileImage'),
+  updateProfile
+)
 
 export default router

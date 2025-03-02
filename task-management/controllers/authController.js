@@ -16,6 +16,7 @@ export const login = async (req, res, next) => {
     // ========================
     // Validación de datos en req.body
     // ========================
+    console.log('DAtos recibidos en login', req.body)
     const { email, password } = req.body
 
     if (!email || !password) {
@@ -137,9 +138,9 @@ export const validateToken = async (req, res) => {
 // ========================
 // Controlador: Cierre de Sesión
 // ========================
-export const signOut = (req, res) => {
-  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'lax' })
-  res.status(200).json({ message: 'Sesión cerrada con éxito' })
+export const logout = (req, res) => {
+  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict' })
+  res.status(200).json({ message: 'logout exitoso' })
 }
 
 // ========================
