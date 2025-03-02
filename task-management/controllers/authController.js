@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 // =========================================
-// Controlador: Inicio de Sesión (Corrección aplicada)
+// Controlador: Inicio de Sesión
 // =========================================
 export const login = async (req, res, next) => {
   try {
