@@ -13,20 +13,18 @@ import cloudinary from '../config/cloudinary.js'
 
 export const login = async (req, res, next) => {
   try {
-    // ========================
-    // Validación de datos en req.body
-    // ========================
-    console.log('DAtos recibidos en login', req.body)
+    console.log('Datos recibidos en login:', req.body)
     const { email, password } = req.body
 
     if (!email || !password) {
-      return res
+      res
         .status(400)
         .json({ message: 'Faltan credenciales: email y contraseña requeridos' })
+      return
     }
 
     // ========================
-    // Buscar usuario en la base de datos solo con email
+    // Buscar usuario en la base de datos
     // ========================
     const user = await User.findOne({ email })
 
@@ -43,14 +41,14 @@ export const login = async (req, res, next) => {
     }
 
     // ========================
-    // Generar token JWT para autenticación
+    // Generar token JWT
     // ========================
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     })
 
     // ========================
-    // Configurar cookie con el token de sesión
+    // Configurar cookie con token
     // ========================
     res.cookie('token', token, {
       httpOnly: true,
@@ -60,7 +58,7 @@ export const login = async (req, res, next) => {
     })
 
     // ========================
-    // Respuesta con datos del usuario autenticado
+    // Responder con datos del usuario autenticado
     // ========================
     res.json({
       message: 'Inicio de sesión exitoso',
@@ -69,6 +67,7 @@ export const login = async (req, res, next) => {
       email: user.email,
     })
   } catch (error) {
+    console.error('❌ Error en login:', error)
     next(error)
   }
 }
@@ -144,6 +143,34 @@ export const logout = (req, res) => {
 }
 
 // ========================
+// Controlador: Obtener Perfil de Usuario
+// ========================
+export const getProfile = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'No autorizado' })
+    }
+
+    const user = await User.findById(req.user.id).select('-password')
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+
+    res.status(200).json({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      profileImage: user.profileImage,
+    })
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Error al obtener el perfil', error: error.message })
+  }
+}
+
+// ========================
 // Controlador: Actualización de Perfil
 // ========================
 export const updateProfile = async (req, res) => {
@@ -165,58 +192,6 @@ export const updateProfile = async (req, res) => {
       const usernameExists = await User.findOne({ username })
       if (usernameExists && usernameExists._id.toString() !== userId) {
         return res.status(400).json({ message: 'El username ya está en uso.' })
-      }
-    }
-
-    // ========================
-    // Manejo de Cambio de Contraseña con Validación
-    // ========================
-    const user = await User.findById(userId)
-
-    if (newPassword) {
-      if (!currentPassword) {
-        return res.status(400).json({
-          message: 'Debes proporcionar la contraseña actual para cambiarla.',
-        })
-      }
-
-      const isMatch = await bcrypt.compare(currentPassword, user.password)
-      if (!isMatch) {
-        return res
-          .status(400)
-          .json({ message: 'La contraseña actual es incorrecta.' })
-      }
-
-      if (newPassword.length < 6) {
-        return res.status(400).json({
-          message: 'La nueva contraseña debe tener al menos 6 caracteres.',
-        })
-      }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 10)
-      user.password = hashedPassword
-    }
-
-    // ========================
-    // Manejo de Imagen de Perfil en Cloudinary
-    // ========================
-    if (req.file) {
-      if (user.profileImage && !user.profileImage.startsWith('http')) {
-        await cloudinary.uploader.destroy(`profile_${userId}`)
-      }
-
-      const uploadedImage = await cloudinary.uploader.upload(req.file.path, {
-        folder: 'user_profiles',
-        public_id: `profile_${userId}`,
-        overwrite: true,
-      })
-
-      if (uploadedImage.secure_url) {
-        user.profileImage = uploadedImage.secure_url
-      } else {
-        return res
-          .status(500)
-          .json({ message: 'Error al subir la imagen a Cloudinary' })
       }
     }
 
