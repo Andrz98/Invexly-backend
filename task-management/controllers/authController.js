@@ -7,27 +7,50 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import cloudinary from '../config/cloudinary.js'
 
-// ========================
-// Controlador: Inicio de Sesión
-// ========================
+// =========================================
+// Controlador: Inicio de Sesión (Corrección aplicada)
+// =========================================
+
 export const login = async (req, res, next) => {
   try {
-    const { email, username, password } = req.body
-    const user = await User.findOne({ $or: [{ email }, { username }] })
+    // ========================
+    // Validación de datos en req.body
+    // ========================
+    const { email, password } = req.body
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: 'Faltan credenciales: email y contraseña requeridos' })
+    }
+
+    // ========================
+    // Buscar usuario en la base de datos solo con email
+    // ========================
+    const user = await User.findOne({ email })
 
     if (!user) {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
+    // ========================
+    // Comparar contraseña ingresada con la almacenada
+    // ========================
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
       return res.status(401).json({ message: 'Contraseña incorrecta' })
     }
 
+    // ========================
+    // Generar token JWT para autenticación
+    // ========================
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     })
 
+    // ========================
+    // Configurar cookie con el token de sesión
+    // ========================
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -35,6 +58,9 @@ export const login = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
+    // ========================
+    // Respuesta con datos del usuario autenticado
+    // ========================
     res.json({
       message: 'Inicio de sesión exitoso',
       token,
