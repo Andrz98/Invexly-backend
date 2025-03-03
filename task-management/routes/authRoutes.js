@@ -3,10 +3,10 @@ import multer from 'multer'
 import {
   register,
   login,
-  logout, // ✅ Nombre correcto de la función
+  logout,
   validateToken,
   updateProfile,
-  getProfile // <-- Se añade el controlador de perfil
+  getProfile
 } from '../controllers/authController.js'
 import validateAuth from '../middlewares/validateAuth.js'
 import authenticateToken from '../middlewares/authenticateToken.js'

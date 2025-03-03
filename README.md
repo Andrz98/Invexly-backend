@@ -169,9 +169,9 @@ Se respeta la configuración inicial proporcionada por Javier. El único cambio 
 \`\`\`javascript
 res.cookie('token', token, {
 httpOnly: true, // Solo accesible desde el servidor
-secure: process.env.NODE_ENV === 'production', // Solo en HTTPS en producción
+secure: process.env.NODE*ENV === 'production', // Solo en HTTPS en producción
 sameSite: 'lax', // Previene ataques CSRF
-maxAge: 7 _ 24 _ 60 _ 60 _ 1000, // Token válido por 7 días
+maxAge: 7 * 24 _ 60 _ 60 \_ 1000, // Token válido por 7 días
 });
 \`\`\`
 

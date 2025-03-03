@@ -1,75 +1,12 @@
-// =========================================
-// Controladores de Autenticación y Perfil de Usuario
-// =========================================
-
+/*
 import User from '../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-// =========================================
-// Controlador: Inicio de Sesión
-// =========================================
-export const login = async (req, res, next) => {
-  try {
-    console.log('Datos recibidos en login:', req.body)
-    const { email, password } = req.body
-
-    if (!email || !password) {
-      res
-        .status(400)
-        .json({ message: 'Faltan credenciales: email y contraseña requeridos' })
-      return
-    }
-
-    // ========================
-    // Buscar usuario en la base de datos
-    // ========================
-    const user = await User.findOne({ email })
-
-    if (!user) {
-      return res.status(401).json({ message: 'Usuario no encontrado' })
-    }
-
-    // ========================
-    // Comparar contraseña ingresada con la almacenada
-    // ========================
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Contraseña incorrecta' })
-    }
-
-    // ========================
-    // Generar token JWT
-    // ========================
-    const tokenExpiry = 60
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: tokenExpiry
-    })
-
-    // ========================
-    // Configurar cookie con token
-    // ========================
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: tokenExpiry * 1000
-    })
-
-    // ========================
-    // Responder con datos del usuario autenticado
-    // ========================
-    res.json({
-      message: 'Inicio de sesión exitoso',
-      token,
-      username: user.username,
-      email: user.email
-    })
-  } catch (error) {
-    console.error('❌ Error en login:', error)
-    next(error)
-  }
-}
+// ========================
+// Lista de Tokens Inválidos (revocados en logout)
+// ========================
+const invalidTokens = new Set()
 
 // ========================
 // Controlador: Registro de Usuario
@@ -93,8 +30,18 @@ export const register = async (req, res, next) => {
 
     await newUser.save()
 
+    // Generar token JWT tras el registro
+    const tokenExpiry = 7 * 24 * 60 * 60
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d'
+      expiresIn: tokenExpiry
+    })
+
+    // Configurar cookie con token
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: tokenExpiry * 1000
     })
 
     res.status(201).json({
@@ -104,14 +51,95 @@ export const register = async (req, res, next) => {
       email: newUser.email
     })
   } catch (error) {
+    console.error('❌ Error en register:', error)
     next(error)
+  }
+}
+
+// ========================
+// Controlador: Inicio de Sesión
+// ========================
+export const login = async (req, res, next) => {
+  try {
+    console.log('Datos recibidos en login:', req.body)
+    const { email, password } = req.body
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: 'Faltan credenciales: email y contraseña requeridos' })
+    }
+
+    // Buscar usuario en la base de datos
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      return res.status(401).json({ message: 'Usuario no encontrado' })
+    }
+
+    // Comparar contraseña ingresada con la almacenada
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Contraseña incorrecta' })
+    }
+
+    // Generar token JWT
+    const tokenExpiry = 7 * 24 * 60 * 60
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: tokenExpiry
+    })
+
+    // Configurar cookie con token
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: tokenExpiry * 1000
+    })
+
+    // Responder con datos del usuario autenticado
+    res.json({
+      message: 'Inicio de sesión exitoso',
+      token,
+      username: user.username,
+      email: user.email
+    })
+  } catch (error) {
+    console.error('❌ Error en login:', error)
+    next(error)
+  }
+}
+
+// ========================
+// Controlador: Cierre de Sesión (Logout) con Invalidación de Token
+// ========================
+export const logout = (req, res) => {
+  try {
+    const token = req.cookies.token
+
+    if (!token) {
+      return res.status(400).json({ message: 'No hay sesión activa' })
+    }
+
+    // Revocar el token agregándolo a la lista de tokens inválidos
+    invalidTokens.add(token)
+
+    // Eliminar la cookie en el cliente
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict'
+    })
+
+    res.json({ message: 'Logout exitoso' })
+  } catch (error) {
+    res.status(500).json({ message: 'Error en el servidor', error })
   }
 }
 
 // ========================
 // Controlador: Validación del Token con Manejo de Expiración
 // ========================
-const invalidTokens = new Set()
 export const validateToken = async (req, res) => {
   try {
     const token =
@@ -129,7 +157,6 @@ export const validateToken = async (req, res) => {
         .json({ message: 'Token inválido (cerraste sesión)' })
     }
 
-    // Verificar el token de forma síncrona para capturar errores antes del callback
     let decoded
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET)
@@ -157,14 +184,6 @@ export const validateToken = async (req, res) => {
       .status(500)
       .json({ message: 'Error en validación', error: error.message })
   }
-}
-
-// ========================
-// Controlador: Cierre de Sesión
-// ========================
-export const logout = (req, res) => {
-  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict' })
-  res.status(200).json({ message: 'logout exitoso' })
 }
 
 // ========================
@@ -243,32 +262,13 @@ export const updateProfile = async (req, res) => {
           .json({ message: 'La contraseña actual es incorrecta.' })
       }
 
-      if (newPassword.length < 6) {
-        return res.status(400).json({
-          message: 'La nueva contraseña debe tener al menos 6 caracteres.'
-        })
-      }
-
       const hashedPassword = await bcrypt.hash(newPassword, 10)
       user.password = hashedPassword
     }
 
-    // Aplicar cambios al usuario
-    if (username) {
-      user.username = username
-    }
-    if (email) {
-      user.email = email
-    }
-
     await user.save()
 
-    res.json({
-      message: 'Perfil actualizado con éxito.',
-      username: user.username,
-      email: user.email,
-      profileImage: user.profileImage
-    })
+    res.json({ message: 'Perfil actualizado con éxito.' })
   } catch (error) {
     res
       .status(500)
