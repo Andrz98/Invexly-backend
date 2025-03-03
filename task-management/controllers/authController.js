@@ -41,7 +41,7 @@ export const login = async (req, res, next) => {
     // ========================
     // Generar token JWT
     // ========================
-    const tokenExpiry = 7 * 24 * 60 * 60
+    const tokenExpiry = 60
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: tokenExpiry
     })
@@ -52,7 +52,7 @@ export const login = async (req, res, next) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: tokenExpiry * 1000
     })
 
@@ -109,15 +109,38 @@ export const register = async (req, res, next) => {
 }
 
 // ========================
-// Controlador: Validación del Token
+// Controlador: Validación del Token con Manejo de Expiración
 // ========================
+const invalidTokens = new Set()
 export const validateToken = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Token inválido o expirado' })
+    const token =
+      req.cookies.token ||
+      (req.headers.authorization && req.headers.authorization.split(' ')[1])
+
+    if (!token) {
+      return res.status(401).json({ message: 'Token no proporcionado' })
     }
 
-    const user = await User.findById(req.user.id)
+    // Verificar si el token ha sido revocado
+    if (invalidTokens.has(token)) {
+      return res
+        .status(401)
+        .json({ message: 'Token inválido (cerraste sesión)' })
+    }
+
+    // Verificar el token de forma síncrona para capturar errores antes del callback
+    let decoded
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET)
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Token expirado' })
+      }
+      return res.status(401).json({ message: 'Token inválido' })
+    }
+
+    const user = await User.findById(decoded.id)
     if (!user) {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
@@ -129,10 +152,10 @@ export const validateToken = async (req, res) => {
       role: user.role
     })
   } catch (error) {
-    res.status(500).json({
-      message: 'Error al actualizar el perfil.',
-      error: error.message
-    })
+    console.error('❌ Error en validateToken:', error)
+    res
+      .status(500)
+      .json({ message: 'Error en validación', error: error.message })
   }
 }
 
@@ -180,7 +203,7 @@ export const updateProfile = async (req, res) => {
     const { username, email, currentPassword, newPassword } = req.body
     const userId = req.user.id
 
-    // ✅ Se obtiene el usuario de la BD antes de modificarlo
+    // Se obtiene el usuario de la BD antes de modificarlo
     const user = await User.findById(userId)
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
@@ -230,7 +253,7 @@ export const updateProfile = async (req, res) => {
       user.password = hashedPassword
     }
 
-    // ✅ Aplicar cambios al usuario
+    // Aplicar cambios al usuario
     if (username) {
       user.username = username
     }
