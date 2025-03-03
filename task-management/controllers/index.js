@@ -1,6 +1,0 @@
-export { default as register } from './registerController.js'
-export { default as login } from './loginController.js'
-export { default as logout } from './logoutController.js'
-export { default as validateToken } from './validateTokenController.js'
-export { default as getProfile } from './profileController.js'
-export { default as updateProfile } from './updateProfileController.js'

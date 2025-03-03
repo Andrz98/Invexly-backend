@@ -1,7 +1,7 @@
-import User from '../../models/user.js'
 import jwt from 'jsonwebtoken'
+import User from '../../models/user.js'
 
-export const validateToken = async (req, res) => {
+const validateToken = async (req, res) => {
   try {
     const token =
       req.cookies.token ||
@@ -15,7 +15,7 @@ export const validateToken = async (req, res) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET)
     } catch (error) {
-      console.error('❌ Error al verificar el token:', error)
+      console.error('Error al verificar el token:', error)
       return res.status(401).json({ message: 'Token inválido o expirado' })
     }
 
@@ -31,9 +31,10 @@ export const validateToken = async (req, res) => {
       role: user.role
     })
   } catch (error) {
-    console.error('❌ Error en validateToken:', error)
     res
       .status(500)
       .json({ message: 'Error en validación', error: error.message })
   }
 }
+
+export default validateToken

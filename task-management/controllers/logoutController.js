@@ -1,6 +1,4 @@
-import { invalidTokens } from '../../config/tokenBlacklist.js'
-
-export const logout = (req, res) => {
+const logout = (req, res) => {
   try {
     const token = req.cookies.token
 
@@ -8,10 +6,6 @@ export const logout = (req, res) => {
       return res.status(400).json({ message: 'No hay sesión activa' })
     }
 
-    // Revocar el token agregándolo a la lista de tokens inválidos
-    invalidTokens.add(token)
-
-    // Eliminar la cookie en el cliente
     res.clearCookie('token', {
       httpOnly: true,
       secure: true,
@@ -23,3 +17,5 @@ export const logout = (req, res) => {
     res.status(500).json({ message: 'Error en el servidor', error })
   }
 }
+
+export default logout

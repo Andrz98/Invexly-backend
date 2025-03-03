@@ -1,19 +1,18 @@
 import express from 'express'
 import multer from 'multer'
-import {
-  register,
-  login,
-  logout,
-  validateToken,
-  updateProfile,
-  getProfile
-} from '../controllers/authController.js'
+
+import register from '../controllers/registerController.js'
+import login from '../controllers/loginController.js'
+import logout from '../controllers/logoutController.js'
+import validateToken from '../controllers/tokenController.js'
+import { getProfile, updateProfile } from '../controllers/profileController.js'
+
 import validateAuth from '../middlewares/validateAuth.js'
 import authenticateToken from '../middlewares/authenticateToken.js'
 
 const router = express.Router()
 
-// Configuración de `multer` para manejar imágenes
+// Configuración de `multer`
 const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
@@ -22,7 +21,7 @@ router.post('/register', validateAuth, register)
 router.post('/login', validateAuth, login)
 router.get('/validate-token', authenticateToken, validateToken)
 router.post('/logout', logout)
-router.get('/profile', authenticateToken, getProfile) // <-- Se añade la ruta
+router.get('/profile', authenticateToken, getProfile)
 
 // Ruta: Actualización de Perfil
 router.put(
