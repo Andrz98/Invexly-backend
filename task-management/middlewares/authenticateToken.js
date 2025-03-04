@@ -15,6 +15,7 @@ const authenticateToken = (req, res, next) => {
     req.user = decoded
     next()
   } catch (error) {
+    console.error('Error al verificar el token:', error)
     return res.status(401).json({ message: 'Token inválido o expirado' })
   }
 }
