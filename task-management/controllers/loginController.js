@@ -27,8 +27,8 @@ const login = async (req, res, next) => {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: 'false', // En el entorno de desarrollo debe ser false porque localhost no usa HTTPS
+      sameSite: 'lax', // De esta forma frontend y backend en localhost compartan cookies
       maxAge: 60 * 60 * 1000
     })
 
