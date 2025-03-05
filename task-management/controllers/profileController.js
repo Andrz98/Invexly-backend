@@ -1,14 +1,14 @@
 import User from '../../models/user.js'
 import bcrypt from 'bcrypt'
+import cloudinary from '../config/cloudinary.js'
 
+// Obtener perfil del usuario
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password')
-
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
-
     res.status(200).json(user)
   } catch (error) {
     res
@@ -17,46 +17,98 @@ export const getProfile = async (req, res) => {
   }
 }
 
-export const updateProfile = async (req, res) => {
+// Actualizar nombre de usuario
+export const updateUsername = async (req, res) => {
   try {
-    const { username, email, currentPassword, newPassword } = req.body
-    const userId = req.user.id
-
-    const user = await User.findById(userId)
+    const { username } = req.body
+    const user = await User.findById(req.user.id)
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
-    if (newPassword) {
-      if (!currentPassword) {
-        return res.status(400).json({
-          message: 'Debes proporcionar la contraseña actual para cambiarla.'
-        })
-      }
-
-      const isMatch = await bcrypt.compare(currentPassword, user.password)
-      if (!isMatch) {
-        return res
-          .status(400)
-          .json({ message: 'La contraseña actual es incorrecta.' })
-      }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 10)
-      user.password = hashedPassword
-    }
-
-    if (username) {
-      user.username = username
-    }
-    if (email) {
-      user.email = email
-    }
-
+    user.username = username
     await user.save()
-    res.json({ message: 'Perfil actualizado con éxito.' })
+    res.json({
+      message: 'Nombre actualizado con éxito.',
+      username: user.username
+    })
   } catch (error) {
     res
       .status(500)
-      .json({ message: 'Error al actualizar el perfil.', error: error.message })
+      .json({ message: 'Error al actualizar el nombre.', error: error.message })
+  }
+}
+
+// Actualizar correo electrónico
+export const updateEmail = async (req, res) => {
+  try {
+    const { email } = req.body
+    const user = await User.findById(req.user.id)
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+
+    user.email = email
+    await user.save()
+    res.json({ message: 'Correo actualizado con éxito.', email: user.email })
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Error al actualizar el correo.', error: error.message })
+  }
+}
+
+// Actualizar contraseña
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+    const user = await User.findById(req.user.id)
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password)
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ message: 'La contraseña actual es incorrecta.' })
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10)
+    await user.save()
+    res.json({ message: 'Contraseña actualizada con éxito.' })
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error al actualizar la contraseña.',
+      error: error.message
+    })
+  }
+}
+
+// Actualizar imagen de perfil
+export const updateAvatar = async (req, res) => {
+  try {
+    const { profileImage } = req.body
+    const user = await User.findById(req.user.id)
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+
+    // Si el usuario ya tiene una imagen personalizada, eliminarla de Cloudinary
+    if (user.profileImage && user.profileImage !== '') {
+      const publicId = user.profileImage.split('/').pop().split('.')[0]
+      await cloudinary.uploader.destroy(publicId)
+    }
+
+    user.profileImage = profileImage
+    await user.save()
+    res.json({
+      message: 'Imagen de perfil actualizada con éxito.',
+      profileImage: user.profileImage
+    })
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Error al actualizar la imagen.', error: error.message })
   }
 }

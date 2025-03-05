@@ -6,7 +6,13 @@ import login from '../controllers/loginController.js'
 import logout from '../controllers/logoutController.js'
 import validateToken from '../controllers/tokenController.js'
 import refreshToken from '../controllers/refreshTokenController.js'
-import { getProfile, updateProfile } from '../controllers/profileController.js'
+import {
+  getProfile,
+  updateUsername,
+  updateEmail,
+  updatePassword,
+  updateAvatar
+} from '../controllers/profileController.js'
 
 import validateAuth from '../middlewares/validateAuth.js'
 import authenticateToken from '../middlewares/authenticateToken.js'
@@ -26,11 +32,14 @@ router.get('/profile', authenticateToken, getProfile)
 router.post('/refresh-token', authenticateToken, refreshToken)
 
 // Ruta: Actualización de Perfil
+router.put('/profile/username', authenticateToken, updateUsername)
+router.put('/profile/email', authenticateToken, updateEmail)
+router.put('/profile/password', authenticateToken, updatePassword)
 router.put(
-  '/profile',
+  '/profile/avatar',
   authenticateToken,
   upload.single('profileImage'),
-  updateProfile
+  updateAvatar
 )
 
 export default router
