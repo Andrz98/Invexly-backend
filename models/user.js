@@ -18,8 +18,8 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       match: [/^\S+@\S+\.\S+$/, 'El email no es válido'],
-      trim: true,
-      lowercase: true // Normaliza el email a minúsculas
+      trim: true
+      // Normaliza el email a minúsculas
     },
     password: {
       type: String,

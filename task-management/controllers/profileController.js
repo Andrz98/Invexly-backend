@@ -27,7 +27,9 @@ export const updateUsername = async (req, res) => {
     }
 
     user.username = username
-    await user.save()
+
+    // Se guarda solo validando los campos modificados
+    await user.save({ validateModifiedOnly: true })
     res.json({
       message: 'Nombre actualizado con éxito.',
       username: user.username
@@ -49,7 +51,7 @@ export const updateEmail = async (req, res) => {
     }
 
     user.email = email
-    await user.save()
+    await user.save({ validateModifiedOnly: true })
     res.json({ message: 'Correo actualizado con éxito.', email: user.email })
   } catch (error) {
     res
@@ -75,7 +77,7 @@ export const updatePassword = async (req, res) => {
     }
 
     user.password = await bcrypt.hash(newPassword, 10)
-    await user.save()
+    await user.save({ validateModifiedOnly: true })
     res.json({ message: 'Contraseña actualizada con éxito.' })
   } catch (error) {
     res.status(500).json({

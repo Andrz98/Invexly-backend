@@ -111,6 +111,13 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Ruta no encontrada' })
 })
 
+console.log('🔍 Rutas registradas en Express:')
+app._router.stack.forEach((r) => {
+  if (r.route && r.route.path) {
+    console.log(r.route.path)
+  }
+})
+
 // =====================================
 // Inicio del Servidor
 // =====================================
