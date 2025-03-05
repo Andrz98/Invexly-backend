@@ -24,7 +24,13 @@ const refreshToken = (req, res) => {
           { expiresIn: '1h' }
         )
 
-        res.json({ accessToken })
+        res.cookie('token', accessToken, {
+          // Ahora usamos accessToken correctamente
+          httpOnly: true, // Protege contra accesos desde JavaScript (previene ataques XSS)
+          secure: process.env.NODE_ENV === 'production', // En producción debe ser `true`, en local `false`
+          sameSite: 'lax', // Permite compartir cookies entre frontend y backend en localhost
+          maxAge: 60 * 60 * 1000 // Expira en 1 hora
+        })
       }
     )
   } catch (error) {

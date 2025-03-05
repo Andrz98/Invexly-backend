@@ -21,18 +21,26 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: 'Contraseña incorrecta' })
     }
 
+    // Generar el token con duración de 1 hora
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     })
 
+    // Configurar la cookie para mantener la sesión
     res.cookie('token', token, {
       httpOnly: true,
-      secure: 'false', // En el entorno de desarrollo debe ser false porque localhost no usa HTTPS
-      sameSite: 'lax', // De esta forma frontend y backend en localhost compartan cookies
-      maxAge: 60 * 60 * 1000
+      secure: false, // `true` en producción, `false` en local
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 1000 // 1 hora de duración
     })
 
-    res.json({ message: 'Inicio de sesión exitoso', token })
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      token, // devolvemos el token por compatibilidad
+      username: user.username,
+      email: user.email,
+      role: user.role
+    })
   } catch (error) {
     console.error('❌ Error en login:', error)
     next(error)

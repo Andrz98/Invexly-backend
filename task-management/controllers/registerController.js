@@ -30,19 +30,23 @@ const register = async (req, res, next) => {
     await newUser.save()
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d'
+      expiresIn: '1h' // 1 hora de duración
     })
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: 'false', // En el entorno de desarrollo debe ser false porque localhost no usa HTTPS
-      sameSite: 'lax', // De esta forma frontend y backend en localhost compartan cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 1000 // 1 hora en milisegundos
     })
 
-    res.status(201).json({ message: 'Usuario registrado con éxito', token })
+    res.status(201).json({
+      message: 'Usuario registrado con éxito',
+      token,
+      username: newUser.username,
+      email: newUser.email
+    })
   } catch (error) {
-    console.error('❌ Error en register:', error)
     next(error)
   }
 }

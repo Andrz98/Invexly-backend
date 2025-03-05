@@ -31,7 +31,11 @@ app.use(handlePreflight) // Manejar solicitudes preflight (CORS OPTIONS)
 // Middleware para depurar cookies recibidas
 // =====================================
 app.use((req, res, next) => {
-  console.log('Cookies recibidas:', req.cookies) // Registro de cookies en cada solicitud
+  console.log('Cookies recibidas:', req.cookies) // Log estándar de cookies
+
+  console.log('Headers de la solicitud:', req.headers) // Log de todas las cabeceras
+
+  console.log('Header Cookie:', req.headers.cookie) // Muestra lo que realmente se envía en el header "Cookie"
   next()
 })
 

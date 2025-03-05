@@ -8,7 +8,7 @@ const logout = (req, res) => {
 
     res.clearCookie('token', {
       httpOnly: true,
-      secure: 'false', // En el entorno de desarrollo debe ser false porque localhost no usa HTTPS
+      secure: process.env.NODE_ENV === 'production', // En el entorno de desarrollo debe ser false porque localhost no usa HTTPS
       sameSite: 'lax' // De esta forma frontend y backend en localhost compartan cookies
     })
 

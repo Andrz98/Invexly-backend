@@ -3,7 +3,7 @@ import cors from 'cors'
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000']
 
 const corsMiddleware = (req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true') // Asegura que los navegadores acepten credenciales
+  res.header('Access-Control-Allow-Credentials', 'true') // Permite credenciales (cookies)
   cors({
     origin: allowedOrigins,
     credentials: true,
