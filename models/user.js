@@ -1,8 +1,5 @@
 import mongoose from 'mongoose'
 
-// =========================================
-// Definición del esquema para los usuarios
-// =========================================
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -11,7 +8,7 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 50,
       trim: true,
-      lowercase: true // Normaliza a minúsculas para evitar duplicados
+      lowercase: true
     },
     email: {
       type: String,
@@ -19,16 +16,24 @@ const userSchema = new mongoose.Schema(
       unique: true,
       match: [/^\S+@\S+\.\S+$/, 'El email no es válido'],
       trim: true
-      // Normaliza el email a minúsculas
     },
     password: {
       type: String,
       required: true,
       minlength: 8,
-      match: [
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-        'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.'
-      ]
+      validate: {
+        validator: function (password) {
+          // Solo validar si la contraseña no está hasheada
+          return (
+            password.startsWith('$2b$') ||
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+              password
+            )
+          )
+        },
+        message:
+          'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.'
+      }
     },
     role: {
       type: String,
@@ -36,11 +41,11 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin']
     },
     avatar: {
-      type: String, // URL del avatar predeterminado
+      type: String,
       default: ''
     },
     profileImage: {
-      type: String, // URL de la imagen personalizada subida por el usuario
+      type: String,
       default: ''
     }
   },

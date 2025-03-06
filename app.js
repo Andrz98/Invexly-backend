@@ -44,11 +44,11 @@ app.use((req, res, next) => {
 // =====================================
 connectDB()
   .then(async () => {
-    console.log('✅ Conexión a MongoDB establecida')
+    console.log('🙂‍ Conexión a MongoDB establecida')
     await crearAdminPorDefecto()
   })
   .catch((error) => {
-    console.error('❌ Error al conectar con MongoDB:', error)
+    console.error('🤯 Error al conectar con MongoDB:', error)
     process.exit(1)
   })
 
@@ -67,7 +67,7 @@ async function crearAdminPorDefecto() {
         !process.env.ADMIN_USERNAME
       ) {
         console.error(
-          '❌ ERROR: Faltan variables de entorno para el administrador'
+          ' 🦽 ERROR: Faltan variables de entorno para el administrador'
         )
         return
       }
@@ -79,15 +79,15 @@ async function crearAdminPorDefecto() {
         role: 'admin'
       })
       await admin.save()
-      console.log('✅ Usuario administrador creado con éxito')
+      console.log('😶‍🌫️ Usuario administrador creado con éxito')
     } else {
       console.log(
-        '⚠️ Admin ya existe en la base de datos, no se ha creado uno nuevo'
+        '😉 Admin ya existe en la base de datos, no se ha creado uno nuevo'
       )
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('❌ Error al crear el administrador:', error)
+      console.error('🦽 Error al crear el administrador:', error)
     }
   }
 }
@@ -107,11 +107,13 @@ app.get('/', (req, res) => {
 // =====================================
 app.use(errorHandler)
 
-app.use((req, res) => {
-  res.status(404).json({ message: 'Ruta no encontrada' })
+app.use((req, res, next) => {
+  if (!res.headersSent) {
+    res.status(404).json({ message: 'Ruta no encontrada' })
+  }
+  next()
 })
 
-console.log('🔍 Rutas registradas en Express:')
 app._router.stack.forEach((r) => {
   if (r.route && r.route.path) {
     console.log(r.route.path)

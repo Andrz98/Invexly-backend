@@ -29,7 +29,7 @@ const login = async (req, res, next) => {
     // Configurar la cookie para mantener la sesión
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false, // `true` en producción, `false` en local
+      secure: process.env.NODE_ENV === 'production', // `true` en producción, `false` en local
       sameSite: 'lax',
       maxAge: 60 * 60 * 1000 // 1 hora de duración
     })

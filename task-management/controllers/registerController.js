@@ -2,23 +2,41 @@ import User from '../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-const register = async (req, res, next) => {
+const register = async (req, res) => {
   try {
+    console.log('📌 Datos recibidos en el backend:', req.body) // <-- Verifica los datos
+
     const { username, email, password, profileImage } = req.body
 
     if (!username || !email || !password) {
+      console.log('⚠️ Faltan datos obligatorios.')
       return res
         .status(400)
         .json({ message: 'Todos los campos son obligatorios' })
     }
 
+    console.log('🔍 Buscando si el usuario ya existe...')
     const existingUser = await User.findOne({ $or: [{ email }, { username }] })
 
     if (existingUser) {
+      console.log('⚠️ El usuario ya está registrado.')
       return res.status(400).json({ message: 'El usuario ya está registrado' })
     }
 
+    console.log('🔐 Validando contraseña antes de encriptar...')
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    if (!passwordRegex.test(password)) {
+      console.log('⚠️ Contraseña inválida.')
+      return res.status(400).json({
+        message: 'La contraseña no cumple con los requisitos de seguridad.'
+      })
+    }
+
+    console.log('🔑 Encriptando contraseña...')
     const hashedPassword = await bcrypt.hash(password, 10)
+
+    console.log('🛠️ Creando usuario en la base de datos...')
     const newUser = new User({
       username,
       email,
@@ -28,26 +46,37 @@ const register = async (req, res, next) => {
     })
 
     await newUser.save()
+    console.log('✅ Usuario guardado correctamente en la base de datos')
 
+    console.log('🔑 Generando Token JWT...')
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h' // 1 hora de duración
+      expiresIn: '1h'
     })
 
+    console.log('🍪 Configurando Cookie...')
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 1000 // 1 hora en milisegundos
+      maxAge: 60 * 60 * 1000 // 1 hora
     })
 
-    res.status(201).json({
+    console.log('🎉 Registro exitoso, enviando respuesta...')
+    return res.status(201).json({
       message: 'Usuario registrado con éxito',
       token,
       username: newUser.username,
       email: newUser.email
     })
   } catch (error) {
-    next(error)
+    console.error('❌ Error en el registro:', error)
+
+    // Evita `ERR_HTTP_HEADERS_SENT` verificando si ya se envió una respuesta
+    if (!res.headersSent) {
+      return res
+        .status(500)
+        .json({ message: 'Error en el registro', error: error.message })
+    }
   }
 }
 
