@@ -64,22 +64,29 @@ export const updateEmail = async (req, res) => {
 export const updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body
+
     const user = await User.findById(req.user.id)
     if (!user) {
+      console.log(' Usuario no encontrado')
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password)
     if (!isMatch) {
+      console.log(' La contraseña actual es incorrecta')
       return res
         .status(400)
         .json({ message: 'La contraseña actual es incorrecta.' })
     }
 
     user.password = await bcrypt.hash(newPassword, 10)
-    await user.save({ validateModifiedOnly: true })
+
+    // Debemos Saltar la validación de Mongoose
+    await user.save({ validateBeforeSave: false })
+
     res.json({ message: 'Contraseña actualizada con éxito.' })
   } catch (error) {
+    console.error('❌ Error en updatePassword:', error)
     res.status(500).json({
       message: 'Error al actualizar la contraseña.',
       error: error.message
