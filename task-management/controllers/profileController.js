@@ -67,13 +67,13 @@ export const updatePassword = async (req, res) => {
 
     const user = await User.findById(req.user.id)
     if (!user) {
-      console.log(' Usuario no encontrado')
+      console.log('Usuario no encontrado')
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password)
     if (!isMatch) {
-      console.log(' La contraseña actual es incorrecta')
+      console.log('La contraseña actual es incorrecta')
       return res
         .status(400)
         .json({ message: 'La contraseña actual es incorrecta.' })
@@ -86,7 +86,7 @@ export const updatePassword = async (req, res) => {
 
     res.json({ message: 'Contraseña actualizada con éxito.' })
   } catch (error) {
-    console.error('❌ Error en updatePassword:', error)
+    console.error('Error en updatePassword:', error)
     res.status(500).json({
       message: 'Error al actualizar la contraseña.',
       error: error.message
