@@ -24,6 +24,8 @@ const validateToken = async (req, res) => {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
+    console.log('Usuario devuelto en validateToken:', user)
+
     res.json({
       message: 'Token válido',
       username: user.username,
@@ -32,6 +34,7 @@ const validateToken = async (req, res) => {
       profileImage: user.profileImage
     })
   } catch (error) {
+    console.error('Error en validateToken:', error)
     res
       .status(500)
       .json({ message: 'Error en validación', error: error.message })

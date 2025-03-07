@@ -126,14 +126,23 @@ export const updateAvatar = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
+    console.log('Avatar actual antes de actualizar:', user.profileImage)
+
     // Si el usuario ya tiene una imagen personalizada, eliminarla de Cloudinary
     if (user.profileImage && user.profileImage !== '') {
       const publicId = user.profileImage.split('/').pop().split('.')[0]
       await cloudinary.uploader.destroy(publicId)
+      console.log(
+        'Imagen anterior eliminada de Cloudinary, publicId:',
+        publicId
+      )
     }
 
     user.profileImage = profileImage
     await user.save()
+
+    console.log('Avatar actualizado en DB:', user.profileImage)
+
     res.json({
       message: 'Imagen de perfil actualizada con éxito.',
       profileImage: user.profileImage
