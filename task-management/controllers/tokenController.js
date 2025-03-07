@@ -28,7 +28,8 @@ const validateToken = async (req, res) => {
       message: 'Token válido',
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
+      profileImage: user.profileImage
     })
   } catch (error) {
     res

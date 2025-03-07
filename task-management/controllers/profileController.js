@@ -63,7 +63,18 @@ export const updateEmail = async (req, res) => {
 // Actualizar contraseña
 export const updatePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body
+    const { currentPassword, newPassword, confirmNewPassword } = req.body
+
+    // Mostrar los valores recibidos para depuración
+    console.log('currentPassword:', currentPassword)
+    console.log('newPassword:', newPassword)
+    console.log('confirmNewPassword:', confirmNewPassword)
+
+    // Validación para asegurarse de que la nueva contraseña coincida con la confirmación
+    if (newPassword !== confirmNewPassword) {
+      console.log('Las contraseñas no coinciden')
+      return res.status(400).json({ message: 'Las contraseñas no coinciden.' })
+    }
 
     const user = await User.findById(req.user.id)
     if (!user) {
@@ -71,6 +82,7 @@ export const updatePassword = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
+    // Comparar la contraseña actual con la almacenada
     const isMatch = await bcrypt.compare(currentPassword, user.password)
     if (!isMatch) {
       console.log('La contraseña actual es incorrecta')
@@ -79,12 +91,23 @@ export const updatePassword = async (req, res) => {
         .json({ message: 'La contraseña actual es incorrecta.' })
     }
 
-    user.password = await bcrypt.hash(newPassword, 10)
+    // Validar que la nueva contraseña y la confirmación sean distintas de la contraseña actual
+    if (currentPassword === newPassword) {
+      console.log('La nueva contraseña no puede ser la misma que la actual')
+      return res.status(400).json({
+        message: 'La nueva contraseña no puede ser la misma que la actual.'
+      })
+    }
 
-    // Debemos Saltar la validación de Mongoose
-    await user.save({ validateBeforeSave: false })
+    // Hacer hash de la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
 
-    res.json({ message: 'Contraseña actualizada con éxito.' })
+    // Actualizar la contraseña en la base de datos
+    user.password = hashedPassword
+    await user.save()
+
+    console.log('Contraseña actualizada con éxito')
+    res.json({ message: 'Contraseña actualizada con éxito' })
   } catch (error) {
     console.error('Error en updatePassword:', error)
     res.status(500).json({
