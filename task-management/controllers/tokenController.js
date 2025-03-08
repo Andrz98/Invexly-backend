@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken'
-import User from '../../models/user.js'
+import User from '../../models/user.js' // Se mantiene la ruta de tu código
 
 const validateToken = async (req, res) => {
   try {
+    // Obtiene el token desde las cookies o el header Authorization
     const token =
       req.cookies.token ||
       (req.headers.authorization && req.headers.authorization.split(' ')[1])
@@ -19,18 +20,23 @@ const validateToken = async (req, res) => {
       return res.status(401).json({ message: 'Token inválido o expirado' })
     }
 
-    const user = await User.findById(decoded.id)
+    // Obtener datos actualizados desde la base de datos
+    const user = await User.findById(decoded.id).select(
+      'username email role profileImage'
+    )
+
     if (!user) {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
-    console.log('Usuario devuelto en validateToken:', user)
+    console.log('Usuario devuelto en validateToken:', user) // Útil para depuración en desarrollo
 
     res.json({
       message: 'Token válido',
+      id: user._id,
       username: user.username,
       email: user.email,
-      role: user.role,
+      role: user.role, // Se mantiene en la respuesta si es necesario
       profileImage: user.profileImage
     })
   } catch (error) {
