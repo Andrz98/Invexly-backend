@@ -8,7 +8,7 @@ const testCloudinary = async () => {
         folder: 'test_uploads'
       }
     )
-    console.log('✅ Cloudinary conectado correctamente:')
+    console.log('👾 Cloudinary conectado correctamente:')
     console.log(result)
   } catch (error) {
     console.error('❌ Error en la conexión con Cloudinary:', error)
