@@ -4,6 +4,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import connectDB from './task-management/config/db.js'
+import { sendEmail } from './task-management/config/brevo.js'
 import authRoutes from './task-management/routes/authRoutes.js'
 import errorHandler from './task-management/middlewares/errorHandler.js'
 import corsMiddleware from './task-management/middlewares/corsMiddleware.js'
@@ -97,6 +98,23 @@ async function crearAdminPorDefecto() {
 // =====================================
 app.use('/auth', authRoutes)
 
+// =====================================
+// Rutas de email sending
+// =====================================
+app.get('/send-email', (req, res) => {
+  sendEmail() // Usa la función con opciones predeterminadas
+    .then((data) => {
+      console.log(
+        'API called successfully. Returned data: ' + JSON.stringify(data)
+      )
+      res.send('Email enviado correctamente')
+    })
+    .catch((error) => {
+      console.error('Error al enviar email:', error)
+      res.status(500).send('Error al enviar el email')
+    })
+})
+
 // Ruta para comprobar que el sistema funciona correctamente
 app.get('/', (req, res) => {
   res.send('Hello World')
@@ -124,7 +142,7 @@ app._router.stack.forEach((r) => {
 // Inicio del Servidor
 // =====================================
 app.listen(port, () => {
-  console.log(`🚀 Servidor iniciado en http://localhost:${port}`)
+  console.log(`🛰️Servidor iniciado en http://localhost:${port}`)
 })
 
 export default app
