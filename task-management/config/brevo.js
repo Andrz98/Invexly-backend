@@ -20,24 +20,39 @@ apiInstance.apiClient.authentications['api-key'].apiKey =
 // ========================================
 export const sendEmail = async (options = {}) => {
   try {
-    const sendSmtpEmail = new Brevo.SendSmtpEmail()
+    console.log('JSON recibido en sendEmail:', JSON.stringify(options, null, 2))
 
     // =======================================================================
     // Validar destinatarios antes de enviar el correo
     // =======================================================================
-    if (!options.to || options.to.length === 0) {
+    if (!options.to || !Array.isArray(options.to) || options.to.length === 0) {
       throw new Error(
-        'Error: Se requiere al menos un destinatario en el campo "to".'
+        // eslint-disable-next-line quotes
+        "Error: Se requiere al menos un destinatario en el campo 'to'."
       )
     }
+
+    // Verificar que cada destinatario tenga un email válido (string no vacío)
+    options.to.forEach((recipient) => {
+      if (
+        typeof recipient.email !== 'string' ||
+        recipient.email.trim() === ''
+      ) {
+        throw new Error(
+          `Error: Email no válido para el destinatario ${JSON.stringify(recipient)}`
+        )
+      }
+    })
 
     // =======================================================================
     // Configurar el correo electrónico con opciones o valores predeterminados
     // =======================================================================
+    const sendSmtpEmail = new Brevo.SendSmtpEmail()
+
     sendSmtpEmail.subject = options.subject || 'My {{params.subject}}'
     sendSmtpEmail.htmlContent =
       options.htmlContent ||
-      '<html><body><h1>Common: This is my first transactional email {{params.parameter}}</h1></body></html>'
+      '<html><body><h1>Contenido por defecto</h1></body></html>'
 
     sendSmtpEmail.sender = options.sender || {
       name: process.env.EMAIL_SENDER_NAME || 'Admin',
@@ -50,24 +65,29 @@ export const sendEmail = async (options = {}) => {
       name: 'Soporte'
     }
 
-    sendSmtpEmail.params = options.params || {
-      parameter: 'Default param',
-      subject: 'Funcionó'
-    }
+    sendSmtpEmail.params =
+      options.params && Object.keys(options.params).length > 0
+        ? options.params
+        : { placeholder: 'default' }
+
+    console.log(
+      'Configuración final del email:',
+      JSON.stringify(sendSmtpEmail, null, 2)
+    )
 
     // =======================================================================
-    // Enviar el correo con manejo de promesas usando `await`
+    // Enviar el correo
     // =======================================================================
     const response = await apiInstance.sendTransacEmail(sendSmtpEmail)
-    console.log('API call successful. Returned data:', JSON.stringify(response))
-    return 'Email enviado correctamente'
+    console.log('Email enviado con éxito:', response)
+    return response
   } catch (error) {
-    console.error('Error en sendEmail:', error)
-    throw new Error('Hubo un problema enviando el email')
+    console.error('Error al enviar el email:', error)
+    throw new Error('Hubo un problema enviando el email: ' + error.message)
   }
 }
 
 // ==================================================================
-// Exportar funciones específicas o un objeto con todas las funciones
+// Exportar la función para ser utilizada en otros módulos
 // ==================================================================
 export default { sendEmail }

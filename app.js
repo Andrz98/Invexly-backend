@@ -102,20 +102,40 @@ app.use('/auth', authRoutes)
 // Rutas de email sending
 // =====================================
 app.post('/send-email', (req, res) => {
-  const { to, subject, message } = req.body
+  console.log(
+    'JSON recibido en /send-email:',
+    JSON.stringify(req.body, null, 2)
+  )
 
-  if (!to) {
-    return res.status(400).send('Error: Se requiere un destinatario.')
+  const { to, subject, message, htmlContent } = req.body
+
+  // Validar que `to` sea un array y tenga al menos un destinatario
+  if (!Array.isArray(to) || to.length === 0) {
+    return res.status(400).send('Error: Se requiere al menos un destinatario.')
   }
 
+  // Validar que cada destinatario tenga un email válido
+  to.forEach((recipient) => {
+    if (typeof recipient.email !== 'string' || recipient.email.trim() === '') {
+      return res
+        .status(400)
+        .send(
+          `Error: Email no válido para el destinatario ${JSON.stringify(recipient)}`
+        )
+    }
+  })
+
   sendEmail({
-    to: [{ email: to }],
+    to,
     subject: subject || 'Usuario registrado con éxito',
-    htmlContent: `<html><body><p>${message || 'Este email confirma tu registro'}</p></body></html>`
+    htmlContent:
+      htmlContent ||
+      `<html><body><p>${message || 'Este email confirma tu registro'}</p></body></html>`
   })
     .then((data) => {
       console.log(
-        'API called successfully. Returned data: ' + JSON.stringify(data)
+        'API called successfully. Returned data:',
+        JSON.stringify(data)
       )
       res.send('Email enviado correctamente')
     })
