@@ -4,12 +4,12 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import connectDB from './task-management/config/db.js'
-import { sendEmail } from './task-management/config/brevo.js'
 import authRoutes from './task-management/routes/authRoutes.js'
 import errorHandler from './task-management/middlewares/errorHandler.js'
 import corsMiddleware from './task-management/middlewares/corsMiddleware.js'
 import handlePreflight from './task-management/middlewares/handlePreflight.js'
 import applyMiddlewares from './task-management/middlewares/expressMiddleware.js'
+import emailController from './task-management/controllers/emails/emailController.js'
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 
@@ -101,53 +101,50 @@ app.use('/auth', authRoutes)
 // =====================================
 // Rutas de email sending
 // =====================================
-app.post('/send-email', (req, res) => {
-  console.log(
-    'JSON recibido en /send-email:',
-    JSON.stringify(req.body, null, 2)
-  )
+app.post('/send-email', async (req, res) => {
+  try {
+    console.log(
+      'JSON recibido en /send-email:',
+      JSON.stringify(req.body, null, 2)
+    )
 
-  const { to, subject, message, htmlContent } = req.body
+    const { to, subject, message, htmlContent } = req.body
 
-  // Validar que `to` sea un array y tenga al menos un destinatario
-  if (!Array.isArray(to) || to.length === 0) {
-    return res.status(400).send('Error: Se requiere al menos un destinatario.')
-  }
-
-  // Validar que cada destinatario tenga un email válido
-  to.forEach((recipient) => {
-    if (typeof recipient.email !== 'string' || recipient.email.trim() === '') {
+    // Validar que `to` sea un array y tenga al menos un destinatario
+    if (!Array.isArray(to) || to.length === 0) {
       return res
         .status(400)
-        .send(
-          `Error: Email no válido para el destinatario ${JSON.stringify(recipient)}`
-        )
+        .send('Error: Se requiere al menos un destinatario.')
     }
-  })
 
-  sendEmail({
-    to,
-    subject: subject || 'Usuario registrado con éxito',
-    htmlContent:
-      htmlContent ||
-      `<html><body><p>${message || 'Este email confirma tu registro'}</p></body></html>`
-  })
-    .then((data) => {
-      console.log(
-        'API called successfully. Returned data:',
-        JSON.stringify(data)
-      )
-      res.send('Email enviado correctamente')
+    // Validar que cada destinatario tenga un email válido
+    to.forEach((recipient) => {
+      if (
+        typeof recipient.email !== 'string' ||
+        recipient.email.trim() === ''
+      ) {
+        return res
+          .status(400)
+          .send(
+            `Error: Email no válido para el destinatario ${JSON.stringify(recipient)}`
+          )
+      }
     })
-    .catch((error) => {
-      console.error('Error al enviar el email', error)
-      res.status(500).send('Error al enviar el email')
-    })
-})
 
-// Ruta para comprobar que el sistema funciona correctamente
-app.get('/', (req, res) => {
-  res.send('Hello World')
+    // Hacemos la llamada a `sendEmail` desde `emailController`
+    await emailController.sendEmail({
+      to,
+      subject: subject || 'Usuario registrado con éxito',
+      htmlContent:
+        htmlContent ||
+        `<html><body><p>${message || 'Este email confirma tu registro'}</p></body></html>`
+    })
+
+    res.send('Email enviado correctamente')
+  } catch (error) {
+    console.error('Error al enviar el email', error)
+    res.status(500).send('Error al enviar el email')
+  }
 })
 
 // =====================================
