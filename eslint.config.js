@@ -21,10 +21,10 @@ export default [
     },
 
     rules: {
-      // ✅ Integración con Prettier (evita conflictos de formato)
+      // Integración con Prettier (evita conflictos de formato)
       'prettier/prettier': ['error', { trailingComma: 'none' }],
 
-      // ✅ Reglas de manejo de variables
+      // Reglas de manejo de variables
       'no-unused-vars': [
         'error',
         { vars: 'all', args: 'after-used', ignoreRestSiblings: false }
@@ -32,7 +32,7 @@ export default [
       'no-console': 'off', // No marcar console.log como advertencia o error
       'consistent-return': 'off', // No forzar que todas las funciones devuelvan un valor
 
-      // ✅ Reglas de calidad de código
+      // Reglas de calidad de código
       eqeqeq: 'warn', // Advertencia si se usa "==" en lugar de "==="
       curly: 'error', // Exigir llaves {} en estructuras de control
       'no-undef': 'error', // Evitar variables no declaradas
@@ -41,11 +41,11 @@ export default [
       'no-multiple-empty-lines': ['warn', { max: 1 }], // Evitar múltiples líneas vacías
       'comma-dangle': ['error', 'never'], // ❌ No permitir comas finales en objetos o arrays
 
-      // ✅ Reglas de estilo
+      // Reglas de estilo
       quotes: ['error', 'single'], // Forzar comillas simples
       semi: ['error', 'never'], // No permitir punto y coma al final de líneas
 
-      // ✅ Reglas específicas de Node.js
+      // Reglas específicas de Node.js
       'node/no-unsupported-features/es-syntax': 'off' // Permitir ESM sin advertencias
     }
   }

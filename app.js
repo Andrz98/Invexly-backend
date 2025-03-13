@@ -101,8 +101,18 @@ app.use('/auth', authRoutes)
 // =====================================
 // Rutas de email sending
 // =====================================
-app.get('/send-email', (req, res) => {
-  sendEmail() // Usa la función con opciones predeterminadas
+app.post('/send-email', (req, res) => {
+  const { to, subject, message } = req.body
+
+  if (!to) {
+    return res.status(400).send('Error: Se requiere un destinatario.')
+  }
+
+  sendEmail({
+    to: [{ email: to }],
+    subject: subject || 'Usuario registrado con éxito',
+    htmlContent: `<html><body><p>${message || 'Este email confirma tu registro'}</p></body></html>`
+  })
     .then((data) => {
       console.log(
         'API called successfully. Returned data: ' + JSON.stringify(data)
@@ -110,7 +120,7 @@ app.get('/send-email', (req, res) => {
       res.send('Email enviado correctamente')
     })
     .catch((error) => {
-      console.error('Error al enviar email:', error)
+      console.error('Error al enviar el email', error)
       res.status(500).send('Error al enviar el email')
     })
 })
