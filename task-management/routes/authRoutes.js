@@ -1,18 +1,18 @@
 import express from 'express'
 import multer from 'multer'
 
-import register from '../controllers/registerController.js'
-import login from '../controllers/loginController.js'
-import logout from '../controllers/logoutController.js'
-import validateToken from '../controllers/tokenController.js'
-import refreshToken from '../controllers/refreshTokenController.js'
+import register from '../controllers/auth/registerController.js'
+import login from '../controllers/auth/loginController.js'
+import logout from '../controllers/auth/logoutController.js'
+import validateToken from '../controllers/auth/tokenController.js'
+import refreshToken from '../controllers/auth/refreshTokenController.js'
 import {
   getProfile,
   updateUsername,
   updateEmail,
   updatePassword,
   updateAvatar
-} from '../controllers/profileController.js'
+} from '../controllers/user/profileController.js'
 
 import validateAuth from '../middlewares/validateAuth.js'
 import authenticateToken from '../middlewares/authenticateToken.js'

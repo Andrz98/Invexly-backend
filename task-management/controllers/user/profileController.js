@@ -1,6 +1,6 @@
-import User from '../../models/user.js'
+import User from '../../../models/user.js'
 import bcrypt from 'bcrypt'
-import cloudinary from '../config/cloudinary.js'
+import cloudinary from '../../config/cloudinary.js'
 
 // Obtener perfil del usuario
 export const getProfile = async (req, res) => {

@@ -1,7 +1,7 @@
-import User from '../../models/user.js'
+import User from '../../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import emailController from './emails/emailController.js'
+import emailController from '../emails/emailController.js'
 
 const register = async (req, res) => {
   try {
