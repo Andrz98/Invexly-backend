@@ -1,4 +1,4 @@
-import apiInstance from '../config/brevo.js'
+import apiInstance from '../../config/brevo.js'
 import Brevo from '@getbrevo/brevo'
 
 // ========================================

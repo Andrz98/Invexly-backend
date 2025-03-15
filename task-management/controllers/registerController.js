@@ -1,7 +1,7 @@
 import User from '../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import sendEmailController from './emailController.js'
+import emailController from './emails/emailController.js'
 
 const register = async (req, res) => {
   try {
@@ -63,7 +63,7 @@ const register = async (req, res) => {
     })
 
     console.log('Enviando correo de bienvenida...')
-    await sendEmailController.sendEmail({
+    await emailController.sendEmail({
       to: [{ email, name: username }],
       subject: 'Bienvenido a TrendPulse',
       htmlContent: `<html><body><h1>Hola ${username}, gracias por registrarte en TrendPulse</h1></body></html>`
