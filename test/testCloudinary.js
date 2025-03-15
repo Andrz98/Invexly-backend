@@ -1,4 +1,4 @@
-import cloudinary from './task-management/config/cloudinary.js'
+import cloudinary from '../task-management/config/cloudinary.js'
 
 const testCloudinary = async () => {
   try {

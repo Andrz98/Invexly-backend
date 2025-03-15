@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import User from '../../models/user.js' // Se mantiene la ruta de tu código
+import User from '../../../models/user.js' // Se mantiene la ruta de tu código
 
 const validateToken = async (req, res) => {
   try {

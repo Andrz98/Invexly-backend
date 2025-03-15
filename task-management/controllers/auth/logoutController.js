@@ -1,13 +1,15 @@
 const logout = async (req, res) => {
   try {
-    const token = req.cookies.token
+    const hasToken = req.cookies.token
+    const hasRefreshToken = req.cookies?.refreshToken
 
-    if (!token) {
+    if (!hasToken && !hasRefreshToken) {
       return res.status(400).json({ message: 'No hay sesión activa' })
     }
 
     // En el entorno de desarrollo, `secure` debe ser `false` porque localhost no usa HTTPS
     // En producción, `secure` debe ser `true` para mayor seguridad
+    // limpia cookies en el backend
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
