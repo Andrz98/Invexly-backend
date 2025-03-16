@@ -22,6 +22,7 @@
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
+    "lib": "^5.1.0",
     "mongodb": "^6.00.0",
     "mongoose": "^7.0.0",
     "morgan": "^1.10.0",
