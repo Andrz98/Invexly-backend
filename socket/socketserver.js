@@ -8,7 +8,7 @@ export const init = (server) => {
   // Iniciamos el socket.io con el servidor HTTP de Express
   io = new Server(server, {
     cors: {
-      origin: 'https://front-roan-ten.vercel.app/', //  Aqui apunto al frontend
+      origin: 'https://equipoverde.netlify.app/', //  Aqui apunto al frontend
       methods: ['GET', 'POST'],
       credentials: true
     }

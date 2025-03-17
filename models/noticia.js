@@ -104,7 +104,7 @@ async function getUserPortfolios(userId) {
   try {
     console.log("Intentando obtener portfolios para userId:", userId);
 
-    const response = await axios.get(`https://tfm-backend-kalx.onrender.com/portfolios?userId=${userId}`);
+    const response = await axios.get(`https://tfm-backend-verde.onrender.com/portfolios?userId=${userId}`);
     console.log("Respuesta recibida. Estado:", response.status);
     console.log("Tipo de datos recibidos:", typeof response.data);
 
