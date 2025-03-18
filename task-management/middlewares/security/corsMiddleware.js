@@ -2,14 +2,13 @@ import cors from 'cors'
 
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000']
 
-const corsMiddleware = (req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true') // Permite credenciales (cookies)
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
-  })(req, res, next)
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }
+
+const corsMiddleware = cors(corsOptions)
 
 export default corsMiddleware

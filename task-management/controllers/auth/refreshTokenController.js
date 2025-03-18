@@ -1,9 +1,7 @@
 import jwt from 'jsonwebtoken'
-
 const refreshToken = (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken // Se obtiene desde las cookies HTTP-only
-
+    const refreshToken = req.cookies.refreshToken
     if (!refreshToken) {
       return res.status(401).json({ message: 'Refresh Token no proporcionado' })
     }
@@ -18,19 +16,22 @@ const refreshToken = (req, res) => {
             .json({ message: 'Refresh Token inválido o expirado' })
         }
 
-        const accessToken = jwt.sign(
+        const newAccessToken = jwt.sign(
           { id: decoded.id },
           process.env.JWT_SECRET,
           { expiresIn: '1h' }
         )
 
-        res.cookie('token', accessToken, {
-          // Ahora usamos accessToken correctamente
-          httpOnly: true, // Protege contra accesos desde JavaScript (previene ataques XSS)
-          secure: process.env.NODE_ENV === 'production', // En producción debe ser `true`, en local `false`
-          sameSite: 'lax', // Permite compartir cookies entre frontend y backend en localhost
-          maxAge: 60 * 60 * 1000 // Expira en 1 hora
+        res.cookie('token', newAccessToken, {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 60 * 1000
         })
+
+        res
+          .status(200)
+          .json({ message: 'Token renovado', token: newAccessToken })
       }
     )
   } catch (error) {
@@ -40,5 +41,4 @@ const refreshToken = (req, res) => {
     })
   }
 }
-
 export default refreshToken
