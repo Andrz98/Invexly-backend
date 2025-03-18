@@ -28,9 +28,10 @@ const login = async (req, res, next) => {
 
     // Configurar la cookie para mantener la sesión
     res.cookie('token', token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production', // `true` en producción, `false` en local
       sameSite: 'lax',
+      path: '/',
       maxAge: 60 * 60 * 1000 // 1 hora de duración
     })
 
@@ -42,7 +43,7 @@ const login = async (req, res, next) => {
       role: user.role
     })
   } catch (error) {
-    console.error('❌ Error en login:', error)
+    console.error('Error en login:', error)
     next(error)
   }
 }
