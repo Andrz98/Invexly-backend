@@ -19,7 +19,13 @@ dotenv.config()
 // Instancia express y puerto definido
 // ===================================
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 8080  //Cambie 3000 por 8080
+
+//Cuando desplegas en Render, NO puedes elegir el puerto porque Render 
+// asigna uno de forma automática en process.env.PORT.
+//El problema es que si Render intenta asignar otro puerto (ej. 8080 o 5432)
+// y el código sigue forzando 3000,
+// entonces el backend no podrá iniciarse correctamente en Render.
 
 // =====================================
 // Aplicación de middlewares globales
