@@ -5,7 +5,7 @@ import emailController from '../emails/emailController.js'
 
 const register = async (req, res) => {
   try {
-    console.log('Datos recibidos en el backend:', req.body) // <-- Verifica los datos
+    console.log('Datos recibidos en el backend:', req.body)
 
     const { username, email, password, profileImage } = req.body
 
@@ -54,12 +54,15 @@ const register = async (req, res) => {
       expiresIn: '1h'
     })
 
+    // Verificar si estamos en producción o desarrollo
+    const isProduction = process.env.NODE_ENV === 'production'
+
     console.log('Configurando Cookie...')
     res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      httpOnly: isProduction ? true : false, // `false` en desarrollo
+      secure: isProduction, // `true` en producción
       sameSite: 'lax',
-      maxAge: 60 * 60 * 1000 // 1 hora
+      maxAge: 60 * 60 * 1000 // 1 hora de duración
     })
 
     console.log('Enviando correo de bienvenida...')

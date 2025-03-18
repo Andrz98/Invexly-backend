@@ -2,10 +2,6 @@ const logout = async (req, res) => {
   try {
     console.log('Cookies recibidas en logout:', req.cookies)
 
-    if (!req.cookies.token && !req.cookies.refreshToken) {
-      return res.status(400).json({ message: 'No hay sesión activa' })
-    }
-
     const isProduction = process.env.NODE_ENV === 'production'
 
     res.cookie('token', '', {
