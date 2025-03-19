@@ -68,8 +68,8 @@ const register = async (req, res) => {
     console.log('Enviando correo de bienvenida...')
     await emailController.sendEmail({
       to: [{ email, name: username }],
-      subject: 'Bienvenido a TrendPulse',
-      htmlContent: `<html><body><h1>Hola ${username}, gracias por registrarte en TrendPulse</h1></body></html>`
+      templateId: 2, // ID del template de bienvenida
+      params: { username }
     })
 
     console.log('Registro exitoso, enviando respuesta...')

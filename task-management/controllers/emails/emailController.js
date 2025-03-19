@@ -35,23 +35,19 @@ export const sendEmail = async (options = {}) => {
     // =======================================================================
     const sendSmtpEmail = new Brevo.SendSmtpEmail()
 
-    sendSmtpEmail.subject = options.subject || 'Bienvenido a TrendPulse'
-    sendSmtpEmail.htmlContent =
-      options.htmlContent ||
-      '<html><body><h1>Gracias por registrarte</h1></body></html>'
+    sendSmtpEmail.templateId = options.templateId || 2 // 2 es el número Id de la plantilla que he creado en Brevo
+    sendSmtpEmail.to = options.to
+    sendSmtpEmail.params = options.params || {}
 
     sendSmtpEmail.sender = options.sender || {
-      name: process.env.EMAIL_SENDER_NAME || 'Admin',
+      name: process.env.EMAIL_SENDER_NAME || 'support@trendPulse',
       email: process.env.EMAIL_SENDER_ADDRESS || 'equipoverde237@gmail.com'
     }
 
-    sendSmtpEmail.to = options.to
     sendSmtpEmail.replyTo = options.replyTo || {
       email: 'support@trendPulse.com',
       name: 'Soporte'
     }
-
-    sendSmtpEmail.params = options.params || { placeholder: 'default' }
 
     console.log(
       'Configuración final del email:',
