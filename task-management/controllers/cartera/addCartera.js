@@ -1,5 +1,6 @@
-// Middleware para agregar una Cartera
-import Portfolio from '../../models/portfolio.js';
+// Controlador para agregar una Cartera
+
+import Portfolio from '../../../models/portfolio.js';
 
 const addCartera = async (req, res) => {
   try {

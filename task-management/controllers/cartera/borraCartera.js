@@ -1,5 +1,6 @@
-// Middleware para borrar una Cartera
-import Portfolio from '../../models/portfolio.js' // Asegúrate de que la ruta sea correcta
+// Controlador para borrar una Cartera
+
+import Portfolio from '../../../models/portfolio.js' // Asegúrate de que la ruta sea correcta
 
 const borraCartera = async (req, res) => {
   try {

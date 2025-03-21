@@ -1,17 +1,17 @@
 // Este script permite insertar noticias a la base de datos
-import express from "express";
-import mongoose from "mongoose";
-import path from "path";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-import Noticia from "./noticia.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import mongoose from "mongoose"
+import path from "path"
+import { fileURLToPath } from "url"
+import dotenv from "dotenv"
+import Noticia from "./noticia.js"
 
-dotenv.config({ path: path.join(__dirname, "..", ".env") });
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-console.log("MONGO_URI:", process.env.MONGO_URI);
+dotenv.config({ path: path.join(__dirname, "..", ".env") })
+
+console.log("MONGO_URI:", process.env.MONGO_URI)
 
 const noticias = [
   {
@@ -45,18 +45,18 @@ mongoose.connect(process.env.MONGO_URI, {
   // Opcionalmente puedes agregar opciones de conexión aquí si son necesarias
 })
 .then(async () => {
-    console.log('Conectado a MongoDB');
+    console.log('Conectado a MongoDB')
     try {
-        const resultado = await Noticia.insertMany(noticias);
-        console.log('Noticias insertadas exitosamente:', resultado);
+        const resultado = await Noticia.insertMany(noticias)
+        console.log('Noticias insertadas exitosamente:', resultado)
     } catch (error) {
-        console.error('Error al insertar las noticias:', error);
+        console.error('Error al insertar las noticias:', error)
     } finally {
-        await mongoose.connection.close();
-        console.log('Conexión cerrada');
+        await mongoose.connection.close()
+        console.log('Conexión cerrada')
     }
 })
 .catch(error => {
-    console.error('Error al conectar a MongoDB:', error);
-    process.exit(1);
+    console.error('Error al conectar a MongoDB:', error)
+    process.exit(1)
 });

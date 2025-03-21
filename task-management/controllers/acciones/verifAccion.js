@@ -1,6 +1,6 @@
-// Middleware para verificar si una accion existe en un Portfolio
-import mongoose from 'mongoose';
-import Portfolio from '../../models/portfolio.js'; // Asegúrate de que la ruta sea correcta
+// Controlador para verificar si una accion existe en un Portfolio
+
+import Portfolio from '../../../models/portfolio.js'; // Asegúrate de que la ruta sea correcta
 
 const verifAccion = async (req, res) => {
   try {

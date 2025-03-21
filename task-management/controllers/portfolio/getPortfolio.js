@@ -1,5 +1,6 @@
-// Middleware para obtener el portfolio de un user determinado
-import Portfolio from '../../models/portfolio.js' // Asegúrate de que la ruta sea correcta
+// Controlador para obtener el portfolio de un user determinado
+
+import Portfolio from '../../../models/portfolio.js' // Asegúrate de que la ruta sea correcta
 
 const getUserPortfolios = async (req, res) => {
   try {

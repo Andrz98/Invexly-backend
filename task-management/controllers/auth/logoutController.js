@@ -7,27 +7,25 @@ const logout = async (req, res) => {
       return res.status(400).json({ message: 'No hay sesión activa' })
     }
 
-    // En el entorno de desarrollo, `secure` debe ser `false` porque localhost no usa HTTPS
-    // En producción, `secure` debe ser `true` para mayor seguridad
-    // limpia cookies en el backend
-    res.clearCookie('token', {
+    // Asegúrate de usar las mismas opciones que usaste al crear las cookies
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' // De esta forma frontend y backend en localhost compartan cookies
-    })
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      path: '/' // Es crucial especificar la misma ruta con la que se creó
+    }
 
-    // También eliminamos el refreshToken en caso de que esté presente
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
-    })
+    // Limpia las cookies
+    res.clearCookie('token', cookieOptions)
+    res.clearCookie('refreshToken', cookieOptions)
+
+    // Verifica que las cookies se hayan eliminado
+    console.log('Cookies después de limpiar:', req.cookies)
 
     res.status(200).json({ message: 'Logout exitoso' })
   } catch (error) {
-    // Si ocurre un error en el servidor, lo registramos y enviamos un mensaje de error
     console.error('Error en logout:', error)
-    res.status(500).json({ message: 'Error en el servidor', error })
+    res.status(500).json({ message: 'Error en el servidor', error: error.message })
   }
 }
 

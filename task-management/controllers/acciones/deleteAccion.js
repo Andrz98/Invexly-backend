@@ -1,5 +1,6 @@
-// Middleware para borrar una acción de una cartera específica
-import Portfolio from '../../models/portfolio.js'; // Asegúrate de que la ruta sea correcta
+// Controlador para borrar una acción de una cartera específica
+
+import Portfolio from '../../../models/portfolio.js'; // Asegúrate de que la ruta sea correcta
 
 const deleteAccion = async (req, res) => {
   try {

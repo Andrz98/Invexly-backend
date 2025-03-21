@@ -37,9 +37,10 @@ const login = async (req, res, next) => {
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
       token, // devolvemos el token por compatibilidad
+      userId: user._id, // <---- Enviamos el _id del usuario
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
     })
   } catch (error) {
     console.error('❌ Error en login:', error)

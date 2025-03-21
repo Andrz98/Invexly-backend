@@ -1,5 +1,6 @@
-// Middleware para obtener todas las acciones disponibles para operar
-import Accion from '../../models/accion.js'; // Asegúrate de que la ruta sea correcta
+// Controlador para obtener todas las acciones disponibles para operar
+
+import Accion from '../../../models/accion.js'; // Asegúrate de que la ruta sea correcta
 
 const getAcciones = async (req, res) => {
   try {
