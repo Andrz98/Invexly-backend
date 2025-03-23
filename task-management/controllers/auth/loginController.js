@@ -7,6 +7,7 @@ const login = async (req, res, next) => {
     const { email, password } = req.body
 
     if (!email || !password) {
+      console.log('Validación activada: faltan credenciales') // console.log para vitest
       return res.status(400).json({ message: 'Faltan credenciales' })
     }
 

@@ -1,48 +1,36 @@
 const logout = async (req, res) => {
   try {
-    console.log('Cookies recibidas en logout:', req.cookies)
+    const hasToken = req.cookies.token
+    const hasRefreshToken = req.cookies?.refreshToken
+
+    if (!hasToken && !hasRefreshToken) {
+      return res.status(400).json({ message: 'No hay sesión activa' })
+    }
+
+    // console.log('Cookies recibidas en logout:', req.cookies) // Útil en desarrollo
 
     const isProduction = process.env.NODE_ENV === 'production'
 
-<<<<<<< HEAD
-    res.cookie('token', '', {
+    res.clearCookie('token', {
       httpOnly: true,
-      expires: new Date(0), // Expira inmediatamente
-      sameSite: 'Lax',
-      secure: isProduction, // Solo en producción
-      path: '/' // Asegurar que se elimine en toda la app
-    })
-
-    res.cookie('refreshToken', '', {
-      httpOnly: true,
-      expires: new Date(0),
-      sameSite: 'Lax',
       secure: isProduction,
+      sameSite: 'lax',
       path: '/'
     })
-=======
-    // Asegúrate de usar las mismas opciones que usaste al crear las cookies
-    const cookieOptions = {
+
+    res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      path: '/' // Es crucial especificar la misma ruta con la que se creó
-    }
+      secure: isProduction,
+      sameSite: 'lax',
+      path: '/'
+    })
 
-    // Limpia las cookies
-    res.clearCookie('token', cookieOptions)
-    res.clearCookie('refreshToken', cookieOptions)
-
-    // Verifica que las cookies se hayan eliminado
-    console.log('Cookies después de limpiar:', req.cookies)
->>>>>>> 8aec277d6bb275b976e22d6476718ba496964059
-
-    console.log('Cookies después de logout:', req.cookies) // Verificar si se eliminaron correctamente
+    // console.log('Cookies después de logout:', req.cookies) // Solo en debugging
 
     res.status(200).json({ message: 'Logout exitoso' })
   } catch (error) {
     console.error('Error en logout:', error)
-    res.status(500).json({ message: 'Error en el servidor', error: error.message })
+    res.status(500).json({ message: 'Error en el servidor', error })
   }
 }
 
