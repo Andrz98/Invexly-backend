@@ -6,10 +6,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# Output directories
 node_modules
 dist
 dist-ssr
 *.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -20,7 +23,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
 .ENV
+
+# Archivos específicos que no deben trackearse
 dbcopy.js
 user_2.js
 user copy.js
