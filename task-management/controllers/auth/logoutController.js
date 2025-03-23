@@ -1,16 +1,21 @@
 const logout = async (req, res) => {
   try {
-    const hasToken = req.cookies.token
-    const hasRefreshToken = req.cookies?.refreshToken
+    // Recuperamos el token desde cookies o desde el header Authorization
+    const tokenFromCookie = req.cookies.token
+    const tokenFromHeader = req.headers.authorization?.split(' ')[1]
+    const refreshToken = req.cookies?.refreshToken
 
+    const hasToken = tokenFromCookie || tokenFromHeader
+    const hasRefreshToken = !!refreshToken
+
+    // Si no hay token ni refreshToken, no hay sesión activa
     if (!hasToken && !hasRefreshToken) {
-      return res.status(400).json({ message: 'No hay sesión activa' })
+      return res.status(401).json({ message: 'Token no proporcionado' })
     }
-
-    // console.log('Cookies recibidas en logout:', req.cookies) // Útil en desarrollo
 
     const isProduction = process.env.NODE_ENV === 'production'
 
+    // Borramos las cookies de autenticación
     res.clearCookie('token', {
       httpOnly: true,
       secure: isProduction,
@@ -25,9 +30,8 @@ const logout = async (req, res) => {
       path: '/'
     })
 
-    // console.log('Cookies después de logout:', req.cookies) // Solo en debugging
-
-    res.status(200).json({ message: 'Logout exitoso' })
+    // Devolvemos una respuesta exitosa
+    return res.status(200).json({ message: 'Sesión cerrada correctamente' })
   } catch (error) {
     console.error('Error en logout:', error)
     res.status(500).json({ message: 'Error en el servidor', error })
