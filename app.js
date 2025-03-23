@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 // =============================================================
 // Importaciones de las dependencias necesarias para el proyecto
 // =============================================================
@@ -146,8 +145,6 @@ app.post('/noticias', addNoticias)
 // Ruta proxy para Finnhub
 app.get('/api/quote/', getIndices)
 
-
-
 // =====================================
 // Rutas de la aplicación
 // =====================================
@@ -223,10 +220,12 @@ app._router.stack.forEach((r) => {
 // =====================================
 // Inicio del Servidor e inicialización de WebSocket
 // =====================================
-server.listen(port, () => {
-  console.log(`🛰️ Servidor iniciado en http://localhost:${port}`)
-  // Inicializar Socket.io con el servidor HTTP
-  init(server)
-})
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(port, () => {
+    console.log(`🛰️ Servidor iniciado en http://localhost:${port}`)
+    // Inicializar Socket.io con el servidor HTTP
+    init(server)
+  })
+}
 
 export default app

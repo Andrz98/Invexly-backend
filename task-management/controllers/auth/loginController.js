@@ -33,7 +33,7 @@ const login = async (req, res, next) => {
 
     res.cookie('token', token, {
       httpOnly: isProduction, // Solo true en producción
-      secure: isProduction,   // Solo true en producción
+      secure: isProduction, // Solo true en producción
       sameSite: isProduction ? 'none' : 'lax', // none en producción (requiere HTTPS), lax en dev
       path: '/',
       maxAge: 60 * 60 * 1000 // 1 hora

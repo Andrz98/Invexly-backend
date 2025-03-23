@@ -1,6 +1,11 @@
 import cors from 'cors'
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000','https://equipo-verde.netlify.app', 'https://tfm-backend-verde.onrender.com']
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://equipo-verde.netlify.app',
+  'https://tfm-backend-verde.onrender.com'
+]
 
 const corsOptions = {
   origin: allowedOrigins,

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import axios from 'axios'
-import { getIO } from '../socket/socketserver.js' 
+import { getIO } from '../socket/socketserver.js'
 
 const noticiaSchema = new mongoose.Schema({
   titulo: {
@@ -41,16 +41,19 @@ const noticiaSchema = new mongoose.Schema({
 
 // Función para extraer tickers de un portfolio con la estructura específica
 function extractTickersFromPortfolio(portfolioData) {
-  console.log('Estructura de datos recibida:', JSON.stringify(portfolioData, null, 2))
-  
+  console.log(
+    'Estructura de datos recibida:',
+    JSON.stringify(portfolioData, null, 2)
+  )
+
   try {
     if (Array.isArray(portfolioData)) {
       console.log('Los datos son un array')
       const allTickers = []
-      
-      portfolioData.forEach(portfolio => {
+
+      portfolioData.forEach((portfolio) => {
         if (portfolio.stocks && Array.isArray(portfolio.stocks)) {
-          portfolio.stocks.forEach(stock => {
+          portfolio.stocks.forEach((stock) => {
             if (stock.ticker) {
               allTickers.push(stock.ticker)
               console.log(`Ticker encontrado: ${stock.ticker}`)
@@ -58,17 +61,21 @@ function extractTickersFromPortfolio(portfolioData) {
           })
         }
       })
-      
+
       return [...new Set(allTickers)]
     }
-    
-    if (portfolioData && portfolioData.portfolios && Array.isArray(portfolioData.portfolios)) {
+
+    if (
+      portfolioData &&
+      portfolioData.portfolios &&
+      Array.isArray(portfolioData.portfolios)
+    ) {
       console.log('Los datos tienen estructura objeto.portfolios')
       const allTickers = []
-      
-      portfolioData.portfolios.forEach(portfolio => {
+
+      portfolioData.portfolios.forEach((portfolio) => {
         if (portfolio.stocks && Array.isArray(portfolio.stocks)) {
-          portfolio.stocks.forEach(stock => {
+          portfolio.stocks.forEach((stock) => {
             if (stock.ticker) {
               allTickers.push(stock.ticker)
               console.log(`Ticker encontrado: ${stock.ticker}`)
@@ -76,23 +83,33 @@ function extractTickersFromPortfolio(portfolioData) {
           })
         }
       })
-      
+
       return [...new Set(allTickers)]
     }
-    
-    console.log('Formato de datos no reconocido, intentando formatos alternativos')
-    
-    if (portfolioData && portfolioData.stocks && Array.isArray(portfolioData.stocks)) {
+
+    console.log(
+      'Formato de datos no reconocido, intentando formatos alternativos'
+    )
+
+    if (
+      portfolioData &&
+      portfolioData.stocks &&
+      Array.isArray(portfolioData.stocks)
+    ) {
       console.log('Los datos tienen estructura objeto.stocks')
       const allTickers = portfolioData.stocks
-        .filter(stock => stock.ticker)
-        .map(stock => stock.ticker)
-      
-      allTickers.forEach(ticker => console.log(`Ticker encontrado: ${ticker}`))
+        .filter((stock) => stock.ticker)
+        .map((stock) => stock.ticker)
+
+      allTickers.forEach((ticker) =>
+        console.log(`Ticker encontrado: ${ticker}`)
+      )
       return [...new Set(allTickers)]
     }
-    
-    console.log('No se pudo extraer tickers de la estructura de datos proporcionada')
+
+    console.log(
+      'No se pudo extraer tickers de la estructura de datos proporcionada'
+    )
     return []
   } catch (error) {
     console.error('Error al extraer tickers:', error)
@@ -169,7 +186,7 @@ noticiaSchema.post('save', async function (doc) {
     }
 
     // Verificar si hay coincidencia entre los tickers de la noticia y los del portfolio
-    const hasMatch = doc.tickers.some(ticker => 
+    const hasMatch = doc.tickers.some((ticker) =>
       portfolioTickers.includes(ticker)
     )
 
@@ -184,9 +201,13 @@ noticiaSchema.post('save', async function (doc) {
         url: doc.url,
         importance: doc.importancia
       })
-      console.log('Noticia emitida: coincidencia de tickers encontrada en portfolios')
+      console.log(
+        'Noticia emitida: coincidencia de tickers encontrada en portfolios'
+      )
     } else {
-      console.log('Noticia no emitida: ningún ticker coincide con los portfolios de usuarios')
+      console.log(
+        'Noticia no emitida: ningún ticker coincide con los portfolios de usuarios'
+      )
     }
   } catch (error) {
     console.error('Error al procesar/emitir evento de socket:', error)

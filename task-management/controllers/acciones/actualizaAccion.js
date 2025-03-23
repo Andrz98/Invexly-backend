@@ -11,9 +11,13 @@ const actualizaAccion = async (req, res) => {
       return res.status(404).json({ message: 'Portfolio no encontrado' })
     }
 
-    const stockIndex = portfolio.stocks.findIndex(stock => stock.ticker === ticker)
+    const stockIndex = portfolio.stocks.findIndex(
+      (stock) => stock.ticker === ticker
+    )
     if (stockIndex === -1) {
-      return res.status(404).json({ message: 'Acción no encontrada en el portfolio' })
+      return res
+        .status(404)
+        .json({ message: 'Acción no encontrada en el portfolio' })
     }
 
     // Actualizar la cantidad y el precio
@@ -25,6 +29,6 @@ const actualizaAccion = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
-};
+}
 
 export { actualizaAccion }

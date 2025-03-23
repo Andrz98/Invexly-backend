@@ -12,7 +12,9 @@ const getIndices = async (req, res) => {
 
     // Validar que el parámetro "symbol" esté presente
     if (!symbol) {
-      return res.status(400).json({ error: 'El parámetro "symbol" es obligatorio' })
+      return res
+        .status(400)
+        .json({ error: 'El parámetro "symbol" es obligatorio' })
     }
 
     // Construir la URL de la API de Finnhub con el token
@@ -26,12 +28,12 @@ const getIndices = async (req, res) => {
     // Enviar la respuesta de la API de Finnhub al cliente
     res.status(200).json(response.data)
   } catch (error) {
-    console.error('Error al obtener los índices:', error);
+    console.error('Error al obtener los índices:', error)
 
     // Manejar errores de la API de Finnhub
     if (error.response) {
       // Si la API de Finnhub devuelve un error
-      res.status(error.response.status).json({ error: error.response.data });
+      res.status(error.response.status).json({ error: error.response.data })
     } else {
       // Si hay un error en el servidor (por ejemplo, problemas de red)
       res.status(500).json({ error: 'Error al obtener los índices' })
@@ -39,4 +41,4 @@ const getIndices = async (req, res) => {
   }
 }
 
-export { getIndices };
+export { getIndices }

@@ -4,11 +4,14 @@ let io
 
 export const init = (server) => {
   // Configuración basada en entorno
-  const allowedOrigins = ['http://localhost:5173', 'https://equipoverde.netlify.app']
-  
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'https://equipoverde.netlify.app'
+  ]
+
   console.log('Ambiente:', process.env.NODE_ENV)
   console.log('Permitiendo orígenes:', allowedOrigins)
-  
+
   // Iniciamos el socket.io con el servidor HTTP de Express
   io = new Server(server, {
     cors: {
@@ -17,18 +20,18 @@ export const init = (server) => {
       credentials: true
     }
   })
-  
+
   io.on('connection', (socket) => {
     console.log('🔌 Cliente conectado:', socket.id)
     console.log('Handshake:', socket.handshake)
     // Enviar un mensaje global, para probar que funciona
     socket.emit('message', 'Hola desde el servidor')
-    
+
     socket.on('disconnect', () => {
       console.log('❌ Cliente desconectado:', socket.id)
     })
   })
-  
+
   console.log(
     `Servidor WebSocket inicializado en puerto ${server.address()?.port || 'desconocido'}`
   )

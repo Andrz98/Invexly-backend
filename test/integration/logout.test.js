@@ -1,13 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import request from 'supertest'
-import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 import app from '../../app.js'
 import User from '../../models/user.js'
-
-// Declaramos la base de datos de prueba:
-const MONGO_TEST_URI =
-  process.env.MONGO_TEST_URI || 'mongodb://127.0.0.1:27017/testdb-auth'
 
 // Start suite test
 describe('test de integración: /auth/logout', () => {
@@ -27,6 +22,7 @@ describe('test de integración: /auth/logout', () => {
 
   // Tarea 1: Se cierra la sesión correctamente
   it('debería de devolver un 200 y cerrar la sesión correctamente', async () => {
+    // Arrange: crear usuario con contraseña hasheada
     const hashedPassword = await bcrypt.hash('Password123!', 10)
     const email = `admin_${Date.now()}@trendPulse.com`
 
@@ -37,24 +33,29 @@ describe('test de integración: /auth/logout', () => {
       role: 'admin'
     })
 
+    // Act 1: iniciar sesión para obtener cookie con token
     const loginResponse = await request(app)
       .post('/auth/login')
       .send({ email, password: 'Password123!' })
 
-    const token = loginResponse.body.token
+    const cookie = loginResponse.headers['set-cookie'][0] // Extraer la cookie
 
+    // Act 2: realizar logout con cookie
     const logoutResponse = await request(app)
       .post('/auth/logout')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Cookie', cookie)
 
+    // Assert: validar que responde 200 y mensaje esperado
     expect(logoutResponse.status).toBe(200)
     expect(logoutResponse.body.message).toBe('Sesión cerrada correctamente')
   })
 
   // Tarea 2: No se proporciona token
   it('debería de devolver un 401 si no se proporciona token', async () => {
+    // Act: logout sin token ni cookie
     const res = await request(app).post('/auth/logout')
 
+    // Assert: debe fallar con 401 y mensaje adecuado
     expect(res.status).toBe(401)
     expect(res.body.message).toBe('Token no proporcionado')
   })

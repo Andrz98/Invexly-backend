@@ -1,25 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import request from 'supertest'
-import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 import app from '../../app.js'
 import User from '../../models/user.js'
-
-// Declaramos la base de datos de prueba:
-
-const MONGO_TEST_URI =
-  process.env.MONGO_TEST_URI || 'mongodb://127.0.0.1:27017/testdb-auth'
 
 // Start suite test
 describe('Test de integración: /auth/login', () => {
   let server
 
   beforeAll(() => {
-    server = app.listen(0) // Inicializa el servidor en un puerto aleatorio
+    server = app.listen(0)
   })
 
   afterAll(async () => {
-    await server.close() // Solo cierra el servidor porque la conexión a MongoDB ya se maneja desde vitest.setup.js
+    await server.close()
   })
 
   beforeEach(async () => {
@@ -28,10 +22,8 @@ describe('Test de integración: /auth/login', () => {
 
   // Tarea 1: Faltan credenciales
   it('debería de devolver un 400 si faltan credenciales', async () => {
-    // Act: Hacer la petición
     const res = await request(app).post('/auth/login').send({})
 
-    // Assert: Comprobar el resultado
     expect(res.status).toBe(400)
     expect(res.body.message).toBe(
       'El usuario o el correo electrónico y la contraseña son obligatorios'
@@ -40,13 +32,11 @@ describe('Test de integración: /auth/login', () => {
 
   // Tarea 2: Usuario no existe
   it('debería devolver un 401 si el usuario no existe', async () => {
-    // Act: Hacer la petición
     const res = await request(app).post('/auth/login').send({
       email: 'noexiste@intentalodenuevo.com',
       password: 'Password123*'
     })
 
-    // Assert: Comprobar el resultado
     expect(res.status).toBe(401)
     expect(res.body.message).toBe('Credenciales incorrectas')
   })
@@ -55,19 +45,18 @@ describe('Test de integración: /auth/login', () => {
   it('debería de mostrar un 401 si la contraseña es incorrecta', async () => {
     const email = `admin_${Date.now()}@trendPulse.com`
     const hashed = await bcrypt.hash('correctPassword', 10)
+
     await User.create({
-      email: 'admin@trendPulse.com',
+      email,
       password: hashed,
       username: 'admin',
       role: 'admin'
     })
 
-    // Act: Hacer la petición
     const res = await request(app)
       .post('/auth/login')
-      .send({ email: 'admin@trendPulse.com', password: 'contraseñaIncorrecta' })
+      .send({ email, password: 'contraseñaIncorrecta' })
 
-    // Assert: Comprobar el resultado
     expect(res.status).toBe(401)
     expect(res.body.message).toBe('Credenciales incorrectas')
   })
@@ -76,23 +65,22 @@ describe('Test de integración: /auth/login', () => {
   it('debería de devolver el preciado 200 y datos si el login es exitoso', async () => {
     const email = `admin_${Date.now()}@trendPulse.com`
     const hashed = await bcrypt.hash('validPassword', 10)
+
     const user = await User.create({
-      email: 'admin@trendPulse.com',
+      email,
       password: hashed,
       username: 'admin',
       role: 'admin'
     })
 
-    // Act: Hacer la petición
     const res = await request(app)
       .post('/auth/login')
-      .send({ email: 'admin@trendPulse.com', password: 'validPassword' })
+      .send({ email, password: 'validPassword' })
 
-    // Assert: Comprobar el resultado
     expect(res.status).toBe(200)
     expect(res.body).toHaveProperty('token')
     expect(res.body.username).toBe('admin')
-    expect(res.body.email).toBe('admin@trendPulse.com')
+    expect(res.body.email).toBe(email)
     expect(res.body.role).toBe('admin')
     expect(res.body.userId).toBe(user._id.toString())
   })

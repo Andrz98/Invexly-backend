@@ -9,8 +9,8 @@ const addAccion = async (req, res) => {
 
     const portfolio = await Portfolio.findOne({
       _id: portfolioId,
-      userId: userId,
-    });
+      userId: userId
+    })
 
     if (!portfolio) {
       return res.status(404).json({ message: 'Portfolio no encontrado' })
@@ -20,14 +20,14 @@ const addAccion = async (req, res) => {
       ticker,
       title,
       price,
-      cantidad,
-    });
+      cantidad
+    })
 
     await portfolio.save()
     res.status(201).json(portfolio)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
-};
+}
 
 export { addAccion }
