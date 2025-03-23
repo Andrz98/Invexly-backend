@@ -1,31 +1,38 @@
 const logout = async (req, res) => {
   try {
-    const hasToken = req.cookies.token
-    const hasRefreshToken = req.cookies?.refreshToken
+    // Recuperamos el token desde cookies o desde el header Authorization
+    const tokenFromCookie = req.cookies.token
+    const tokenFromHeader = req.headers.authorization?.split(' ')[1]
+    const refreshToken = req.cookies?.refreshToken
 
+    const hasToken = tokenFromCookie || tokenFromHeader
+    const hasRefreshToken = !!refreshToken
+
+    // Si no hay token ni refreshToken, no hay sesión activa
     if (!hasToken && !hasRefreshToken) {
-      return res.status(400).json({ message: 'No hay sesión activa' })
+      return res.status(401).json({ message: 'Token no proporcionado' })
     }
 
-    // En el entorno de desarrollo, `secure` debe ser `false` porque localhost no usa HTTPS
-    // En producción, `secure` debe ser `true` para mayor seguridad
-    // limpia cookies en el backend
+    const isProduction = process.env.NODE_ENV === 'production'
+
+    // Borramos las cookies de autenticación
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' // De esta forma frontend y backend en localhost compartan cookies
+      secure: isProduction,
+      sameSite: 'lax',
+      path: '/'
     })
 
-    // También eliminamos el refreshToken en caso de que esté presente
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      secure: isProduction,
+      sameSite: 'lax',
+      path: '/'
     })
 
-    res.status(200).json({ message: 'Logout exitoso' })
+    // Devolvemos una respuesta exitosa
+    return res.status(200).json({ message: 'Sesión cerrada correctamente' })
   } catch (error) {
-    // Si ocurre un error en el servidor, lo registramos y enviamos un mensaje de error
     console.error('Error en logout:', error)
     res.status(500).json({ message: 'Error en el servidor', error })
   }

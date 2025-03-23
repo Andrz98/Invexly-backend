@@ -5,7 +5,7 @@ import emailController from '../emails/emailController.js'
 
 const register = async (req, res) => {
   try {
-    console.log('Datos recibidos en el backend:', req.body) // <-- Verifica los datos
+    console.log('Datos recibidos en el backend:', req.body)
 
     const { username, email, password, profileImage } = req.body
 
@@ -54,19 +54,22 @@ const register = async (req, res) => {
       expiresIn: '1h'
     })
 
+    // Verificar si estamos en producción o desarrollo
+    const isProduction = process.env.NODE_ENV === 'production'
+
     console.log('Configurando Cookie...')
     res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      httpOnly: isProduction ? true : false, // `false` en desarrollo
+      secure: isProduction, // `true` en producción
       sameSite: 'lax',
-      maxAge: 60 * 60 * 1000 // 1 hora
+      maxAge: 60 * 60 * 1000 // 1 hora de duración
     })
 
     console.log('Enviando correo de bienvenida...')
     await emailController.sendEmail({
       to: [{ email, name: username }],
-      subject: 'Bienvenido a TrendPulse',
-      htmlContent: `<html><body><h1>Hola ${username}, gracias por registrarte en TrendPulse</h1></body></html>`
+      templateId: 2, // ID del template de bienvenida
+      params: { username }
     })
 
     console.log('Registro exitoso, enviando respuesta...')
