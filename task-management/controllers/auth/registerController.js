@@ -59,10 +59,11 @@ const register = async (req, res) => {
 
     console.log('Configurando Cookie...')
     res.cookie('token', token, {
-      httpOnly: isProduction ? true : false, // `false` en desarrollo
-      secure: isProduction, // `true` en producción
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 1000 // 1 hora de duración
+      httpOnly: isProduction, // Solo true en producción
+      secure: isProduction, // Solo true en producción
+      sameSite: isProduction ? 'none' : 'lax', // none en producción (requiere HTTPS), lax en dev
+      path: '/',
+      maxAge: 60 * 60 * 1000 // 1 hora
     })
 
     console.log('Enviando correo de bienvenida...')
