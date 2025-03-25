@@ -1,5 +1,4 @@
 // Middleware para añadir una acción a una cartera específica
-import mongoose from 'mongoose'
 import Portfolio from '../../models/portfolio.js'
 
 const addAccion = async (req, res) => {
