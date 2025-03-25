@@ -33,12 +33,13 @@ describe('test de integración: /auth/logout', () => {
       role: 'admin'
     })
 
-    // Act 1: iniciar sesión para obtener cookie con token
+    // Act 1: iniciar sesión para obtener el token
     const loginResponse = await request(app)
       .post('/auth/login')
       .send({ email, password: 'Password123!' })
 
-    const cookie = loginResponse.headers['set-cookie'][0] // Extraer la cookie
+    const token = loginResponse.body.token
+    const cookie = `token=${token}` // Construir la cookie manualmente
 
     // Act 2: realizar logout con cookie
     const logoutResponse = await request(app)

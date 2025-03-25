@@ -21,7 +21,8 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: 'Credenciales incorrectas' }) // Mensaje unificado
     }
 
-    const isProduction = process.env.NODE_ENV === 'production'
+    const isProduction =
+      process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test'
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
