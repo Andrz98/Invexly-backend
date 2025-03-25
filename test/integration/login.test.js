@@ -25,9 +25,7 @@ describe('Test de integración: /auth/login', () => {
     const res = await request(app).post('/auth/login').send({})
 
     expect(res.status).toBe(400)
-    expect(res.body.message).toBe(
-      'El usuario o el correo electrónico y la contraseña son obligatorios'
-    )
+    expect(res.body.message).toBe('Todos los campos son obligatorios')
   })
 
   // Tarea 2: Usuario no existe

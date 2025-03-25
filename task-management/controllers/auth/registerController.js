@@ -1,7 +1,7 @@
 import User from '../../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import emailController from '../emails/emailController.js'
+import { sendEmail } from '../emails/emailController.js'
 
 const register = async (req, res) => {
   try {
@@ -46,8 +46,19 @@ const register = async (req, res) => {
       profileImage: profileImage || 'default-profile.png'
     })
 
-    await newUser.save()
-    console.log('Usuario guardado correctamente en la base de datos')
+    // Aquí capturamos un error de calve duplicada desde MongoDB
+    try {
+      await newUser.save()
+      console.log('Usuario guardado correctamente en la base de datos')
+    } catch (error) {
+      if (error.code === 11000) {
+        console.log('Error: usuario duplicado')
+        return res
+          .status(400)
+          .json({ message: 'El usuario ya está registrado' })
+      }
+      throw error
+    }
 
     console.log('Generando Token JWT...')
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
@@ -67,7 +78,7 @@ const register = async (req, res) => {
     })
 
     console.log('Enviando correo de bienvenida...')
-    await emailController.sendEmail({
+    await sendEmail({
       to: [{ email, name: username }],
       templateId: 2, // ID del template de bienvenida
       params: { username }

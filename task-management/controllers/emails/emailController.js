@@ -65,6 +65,3 @@ export const sendEmail = async (options = {}) => {
     throw new Error('Hubo un problema enviando el email: ' + error.message)
   }
 }
-
-// Exportar función para ser utilizada en otros módulos
-export default { sendEmail }
