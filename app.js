@@ -139,8 +139,17 @@ app.post('/noticias', addNoticias)
 //Finnhub no tiene configurados los encabezados CORS necesarios para permitir solicitudes
 //desde mi front y me daria problemas de Cors
 
+// ========================
 // Ruta proxy para Finnhub
+// ========================
 app.get('/api/quote/', getIndices)
+
+// =====================================
+// Rutas para saber que ya esta operativo el servidor en render
+// =====================================
+app.get('/', (req, res) => {
+  res.send('No esperes más, ya estoy listo🔛')
+})
 
 // =====================================
 // Rutas de la aplicación
@@ -219,7 +228,7 @@ app._router.stack.forEach((r) => {
 // =====================================
 if (process.env.NODE_ENV !== 'test') {
   server.listen(port, () => {
-    console.log(`🛰️ Servidor iniciado en http://localhost:${port}`)
+    console.log(`🛰️ Entorno: ${process.env.NODE_ENV}`)
     // Inicializar Socket.io con el servidor HTTP
     init(server)
   })
