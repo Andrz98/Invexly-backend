@@ -1,18 +1,13 @@
 import cors from 'cors'
 
-const devOrigins = ['http://localhost:5173', 'http://localhost:3000']
-const prodOrigins = ['https://equipo-verde.netlify.app']
-
-// Configuración basada en entorno
-const allowedOrigins =
-  process.env.NODE_ENV === 'production' ? prodOrigins : devOrigins
+const allowedOrigins = ['https://equipo-verde.netlify.app']
 
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true)
     } else {
-      callback(new Error(`Origin o permitido por CORS: ${origin}`))
+      callback(new Error(`Origen no permitido por CORS: ${origin}`))
     }
   },
   credentials: true,
