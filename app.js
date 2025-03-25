@@ -1,6 +1,3 @@
-// =============================================================
-// Importaciones de las dependencias necesarias para el proyecto
-// =============================================================
 import express from 'express'
 import dotenv from 'dotenv'
 import connectDB from './task-management/config/db.js'
@@ -9,7 +6,7 @@ import errorHandler from './task-management/middlewares/errors/errorHandler.js'
 import corsMiddleware from './task-management/middlewares/security/corsMiddleware.js'
 import handlePreflight from './task-management/middlewares/security/handlePreflight.js'
 import applyMiddlewares from './task-management/middlewares/express/expressMiddleware.js'
-import emailController from './task-management/controllers/emails/emailController.js'
+import { sendEmail } from './task-management/controllers/emails/emailController.js'
 import { getUserPortfolios } from './task-management/controllers/portfolio/getPortfolio.js'
 import { addCartera } from './task-management/controllers/cartera/addCartera.js'
 import { borraCartera } from './task-management/controllers/cartera/borraCartera.js'
@@ -184,7 +181,7 @@ app.post('/send-email', async (req, res) => {
     })
 
     // Hacemos la llamada a `sendEmail` desde `emailController`
-    await emailController.sendEmail({
+    await sendEmail({
       to,
       subject: subject || 'Usuario registrado con éxito',
       htmlContent:
