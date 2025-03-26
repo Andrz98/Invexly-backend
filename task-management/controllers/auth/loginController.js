@@ -22,7 +22,7 @@ const login = async (req, res, next) => {
     }
 
     const isProduction =
-      process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test'
+      process.env.NODE_ENV === 'production'
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
