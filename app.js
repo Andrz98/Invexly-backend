@@ -21,6 +21,7 @@ import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import { init } from './socket/socketserver.js'
 import http from 'http' // Importar http para crear el servidor
+import cookieParser from 'cookie-parser'
 
 dotenv.config()
 
@@ -31,6 +32,11 @@ const app = express()
 const port = process.env.PORT || 8080
 // Crear el servidor HTTP explícitamente, para poder iniciar WebSockets
 const server = http.createServer(app)
+
+// =====================================
+// Middleware para parsear cookies
+// =====================================
+app.use(cookieParser())
 
 // =====================================
 // Aplicación de middlewares globales
