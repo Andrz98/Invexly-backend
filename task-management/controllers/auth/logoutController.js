@@ -1,5 +1,11 @@
 const logout = async (req, res) => {
   try {
+    res.header(
+      'Access-Control-Allow-Origin',
+      'https://equipo-verde.netlify.app'
+    )
+    res.header('Access-Control-Allow-Credentials', 'true')
+
     // Recuperamos el token desde cookies o desde el header Authorization
     const tokenFromCookie = req.cookies.token
     const tokenFromHeader = req.headers.authorization?.split(' ')[1]
@@ -19,14 +25,14 @@ const logout = async (req, res) => {
     res.clearCookie('token', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: 'none',
       path: '/'
     })
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: 'none',
       path: '/'
     })
 

@@ -5,7 +5,11 @@ import { sendEmail } from '../emails/emailController.js'
 
 const register = async (req, res) => {
   try {
-    console.log('Datos recibidos en el backend:', req.body)
+    res.header(
+      'Access-Control-Allow-Origin',
+      'https://equipo-verde.netlify.app'
+    )
+    res.header('Access-Control-Allow-Credentials', 'true')
 
     const { username, email, password, profileImage } = req.body
 
