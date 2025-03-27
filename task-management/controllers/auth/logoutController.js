@@ -19,19 +19,17 @@ const logout = async (req, res) => {
       return res.status(401).json({ message: 'Token no proporcionado' })
     }
 
-    const isProduction = process.env.NODE_ENV === 'production'
-
     // Borramos las cookies de autenticación
     res.clearCookie('token', {
       httpOnly: true,
-      secure: isProduction,
+      secure: true,
       sameSite: 'none',
       path: '/'
     })
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: isProduction,
+      secure: true,
       sameSite: 'none',
       path: '/'
     })

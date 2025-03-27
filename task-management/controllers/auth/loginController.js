@@ -21,24 +21,41 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: 'Credenciales incorrectas' }) // Mensaje unificado
     }
 
-    const isProduction = process.env.NODE_ENV === 'production'
-
+    // Generar token de acceso (access token)
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     })
 
-    if (!token) {
+    // Generar token de renovación (refresh token)
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: '7d' }
+    )
+
+    if (!token || !refreshToken) {
       return res.status(500).json({ message: 'Error generando token' })
     }
 
+    // Configurar cookie del access token
     res.cookie('token', token, {
-      httpOnly: isProduction, // Solo true en producción
-      secure: isProduction, // Solo true en producción
-      sameSite: isProduction ? 'none' : 'lax', // none en producción (requiere HTTPS), lax en dev
+      httpOnly: true, // Acceso restringido desde JS
+      secure: true, // Solo se envía por HTTPS
+      sameSite: 'none', // Permitir cross-site (Netlify + Render)
       path: '/',
       maxAge: 60 * 60 * 1000 // 1 hora
     })
 
+    // Configurar cookie del refresh token
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true, // Acceso restringido desde JS
+      secure: true, // Solo se envía por HTTPS
+      sameSite: 'none', // Permitir cross-site
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+    })
+
+    // Enviar respuesta exitosa
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
       token,

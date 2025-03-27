@@ -29,7 +29,7 @@ router.post('/login', validateAuth, login)
 router.get('/validate-token', authenticateToken, validateToken)
 router.post('/logout', authenticateToken, logout)
 router.get('/profile', authenticateToken, getProfile)
-router.post('/refresh-token', authenticateToken, refreshToken)
+router.post('/refresh-token', refreshToken)
 
 // Ruta: Actualización de Perfil
 router.put('/profile/username', authenticateToken, updateUsername)

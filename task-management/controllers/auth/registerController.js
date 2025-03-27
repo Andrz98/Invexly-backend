@@ -69,16 +69,28 @@ const register = async (req, res) => {
       expiresIn: '1h'
     })
 
-    // Verificar si estamos en producción o desarrollo
-    const isProduction = process.env.NODE_ENV === 'production'
+    console.log('Generando Refresh Token...')
+    const refreshToken = jwt.sign(
+      { id: newUser._id },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: '7d' }
+    )
 
-    console.log('Configurando Cookie...')
+    console.log('Configurando Cookies...')
     res.cookie('token', token, {
-      httpOnly: isProduction, // Solo true en producción
-      secure: isProduction, // Solo true en producción
-      sameSite: isProduction ? 'none' : 'lax', // none en producción (requiere HTTPS), lax en dev
+      httpOnly: true, // Solo accesible por el navegador
+      secure: true, // Solo por HTTPS
+      sameSite: 'none', // Cross-site (Netlify + Render)
       path: '/',
       maxAge: 60 * 60 * 1000 // 1 hora
+    })
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true, // Solo accesible por el navegador
+      secure: true, // Solo por HTTPS
+      sameSite: 'none', // Cross-site
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
     })
 
     console.log('Enviando correo de bienvenida...')
