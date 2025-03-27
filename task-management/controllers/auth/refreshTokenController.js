@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken'
-const refreshToken = (req, res) => {
+import User from '../../models/user.js'
+
+const refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken
     if (!refreshToken) {
@@ -9,11 +11,16 @@ const refreshToken = (req, res) => {
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
-      (error, decoded) => {
+      async (error, decoded) => {
         if (error) {
           return res
             .status(403)
             .json({ message: 'Refresh Token inválido o expirado' })
+        }
+
+        const user = await User.findById(decoded.id).select('-password')
+        if (!user) {
+          return res.status(404).json({ message: 'Usuario no encontrado' })
         }
 
         const newAccessToken = jwt.sign(
@@ -26,12 +33,14 @@ const refreshToken = (req, res) => {
           httpOnly: true,
           sameSite: 'lax',
           secure: process.env.NODE_ENV === 'production',
-          maxAge: 60 * 60 * 1000
+          maxAge: 60 * 60 * 1000 // 1 hora
         })
 
-        res
-          .status(200)
-          .json({ message: 'Token renovado', token: newAccessToken })
+        res.status(200).json({
+          message: 'Token renovado',
+          accessToken: newAccessToken,
+          user
+        })
       }
     )
   } catch (error) {
@@ -41,4 +50,5 @@ const refreshToken = (req, res) => {
     })
   }
 }
+
 export default refreshToken
