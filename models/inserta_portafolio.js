@@ -66,7 +66,7 @@ const portfolioData = {
 };
 
 // 🔥 Aquí ponemos un 'userId' real que esté en la base de datos
-const userId = "67a7c4cba0fbbcefea86135f";
+const userId = "67e438c8016a0f6072a3a890";
 
 // Conectar a MongoDB
 mongoose

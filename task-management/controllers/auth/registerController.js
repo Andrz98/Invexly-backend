@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import User from '../../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
@@ -43,8 +44,10 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role: 'user',
-      profileImage: profileImage || 'default-profile.png'
+      //profileImage: profileImage || 'https://res.cloudinary.com/dwsnf2wlr/image/upload/v1743014124/p83xds6yhage9eatibgm.jpg'
+      profileImage: profileImage
     })
+    console.log('Correo a enviar1:', email)
 
     await newUser.save()
     console.log('Usuario guardado correctamente en la base de datos')
@@ -53,6 +56,9 @@ const register = async (req, res) => {
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     })
+
+    console.log('Correo a enviar2:', email)
+
 
     console.log('Configurando Cookie...')
     res.cookie('token', token, {
@@ -63,8 +69,13 @@ const register = async (req, res) => {
     })
 
     console.log('Enviando correo de bienvenida...')
+    console.log('Enviando correo de bienvenida a este email...', email)
+    console.log('Correo a enviar3:', email)
     await emailController.sendEmail({
-      to: [{ email, name: username }],
+      to: {
+        email: email,
+        name: username
+      },
       subject: 'Bienvenido a TrendPulse',
       htmlContent: `<html><body><h1>Hola ${username}, gracias por registrarte en TrendPulse</h1></body></html>`
     })

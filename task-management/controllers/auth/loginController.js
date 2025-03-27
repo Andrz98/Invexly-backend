@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import User from '../../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
@@ -5,18 +6,36 @@ import bcrypt from 'bcrypt'
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
+    console.log('Email recibido:', email) 
+    console.log('Contraseña recibida:', password) 
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Faltan credenciales' })
     }
 
     const user = await User.findOne({ email })
+    console.log('Usuario encontrado:', user) 
+
+    // Buscar usuarios con diferentes variaciones
+    const userByEmail = await User.findOne({ email: email }) 
+    const userByEmailTrimmed = await User.findOne({ email: email.trim() }) 
+    const userByEmailLowerCase = await User.findOne({ email: email.toLowerCase() }) 
+
+    console.log('Búsqueda por email exacto:', userByEmail) 
+    console.log('Búsqueda por email trimmed:', userByEmailTrimmed) 
+    console.log('Búsqueda por email lowercase:', userByEmailLowerCase) 
+
+
 
     if (!user) {
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
 
+    console.log('Contraseña almacenada:', user.password)
     const isMatch = await bcrypt.compare(password, user.password)
+    console.log('¿Contraseña coincide?:', isMatch)
+    
+
     if (!isMatch) {
       return res.status(401).json({ message: 'Contraseña incorrecta' })
     }
@@ -41,6 +60,7 @@ const login = async (req, res, next) => {
       username: user.username,
       email: user.email,
       role: user.role,
+      profile: user.profileImage
     })
   } catch (error) {
     console.error('❌ Error en login:', error)
