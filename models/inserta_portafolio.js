@@ -1,6 +1,5 @@
 //Este script permite insertar un portfolio en la base de datos del usuario
 //Referenciado por su userId
-import express from 'express'
 import mongoose from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -111,7 +110,7 @@ const portfolioData = {
 }
 
 // 🔥 Aquí ponemos un 'userId' real que esté en la base de datos
-const userId = '67a7c4cba0fbbcefea86135f'
+const userId = '67e438c8016a0f6072a3a890'
 
 // Conectar a MongoDB
 mongoose
@@ -137,7 +136,7 @@ async function addPortfolios(userId, portfolioData) {
 
       await newPortfolio.save()
       console.log(`✅ Portafolio "${portfolio.name}" agregado correctamente.`)
-      console.log(`✅ Guardado:`, JSON.stringify(newPortfolio, null, 2))
+      console.log('✅ Guardado:', JSON.stringify(newPortfolio, null, 2))
     }
   } catch (error) {
     console.error('❌ Error al insertar los portafolios:', error)

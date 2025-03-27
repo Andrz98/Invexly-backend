@@ -47,8 +47,10 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role: 'user',
-      profileImage: profileImage || 'default-profile.png'
+      //profileImage: profileImage || 'https://res.cloudinary.com/dwsnf2wlr/image/upload/v1743014124/p83xds6yhage9eatibgm.jpg'
+      profileImage: profileImage
     })
+    console.log('Correo a enviar1:', email)
 
     // Aquí capturamos un error de calve duplicada desde MongoDB
     try {
