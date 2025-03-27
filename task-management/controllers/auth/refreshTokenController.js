@@ -31,8 +31,8 @@ const refreshToken = async (req, res) => {
 
         res.cookie('token', newAccessToken, {
           httpOnly: true,
-          sameSite: 'lax',
-          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'none',
+          secure: true,
           maxAge: 60 * 60 * 1000 // 1 hora
         })
 
