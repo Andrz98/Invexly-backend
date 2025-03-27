@@ -43,6 +43,10 @@ app.use(cookieParser())
 // =====================================
 applyMiddlewares(app) // Aplica middlewares generales
 app.use(corsMiddleware) // Aplica CORS antes de definir rutas
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true')
+  next()
+})
 app.use(handlePreflight) // Manejar solicitudes preflight (CORS OPTIONS)
 
 // =====================================
