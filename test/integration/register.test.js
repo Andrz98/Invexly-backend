@@ -43,7 +43,9 @@ describe('test de integración: /auth/register', () => {
       .send({ email: 'noexiste@intentalodenuevo.com' })
 
     expect(res.status).toBe(400)
-    expect(res.body.message).toBe('Todos los campos son obligatorios')
+    expect(res.body.message).toBe(
+      'Username, email y password son obligatorios para registro'
+    )
   })
 
   // Tarea 2: Usuario ya registrado
