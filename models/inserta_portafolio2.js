@@ -1,6 +1,5 @@
 //Este script permite insertar un portfolio en la base de datos del usuario
 //Referenciado por su userId
-import express from 'express'
 import mongoose from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
