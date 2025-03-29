@@ -30,7 +30,16 @@ export default [
       sourceType: 'module', // Configurar para trabajar con ECMAScript Modules (ESM)
 
       globals: {
-        ...globals.node // Incluir variables globales de Node.js para evitar errores en ESLint
+        ...globals.node, // Incluir variables globales de Node.js para evitar errores en ESLint
+        beforeAll: true,
+        afterAll: true,
+        beforeEach: true,
+        afterEach: true,
+        describe: true,
+        expect: true,
+        it: true,
+        test: true,
+        vi: true
       }
     },
 
