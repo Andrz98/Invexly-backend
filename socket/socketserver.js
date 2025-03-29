@@ -4,13 +4,7 @@ let io
 
 export const init = (server) => {
   // Configuración basada en entorno
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'https://equipoverde.netlify.app'
-  ]
-
-  console.log('Ambiente:', process.env.NODE_ENV)
-  console.log('Permitiendo orígenes:', allowedOrigins)
+  const allowedOrigins = ['https://equipoverde.netlify.app']
 
   // Iniciamos el socket.io con el servidor HTTP de Express
   io = new Server(server, {
@@ -28,7 +22,7 @@ export const init = (server) => {
     socket.emit('message', 'Hola desde el servidor')
 
     socket.on('disconnect', () => {
-      console.log('❌ Cliente desconectado:', socket.id)
+      console.log('🔌 Cliente desconectado:', socket.id)
     })
   })
 
