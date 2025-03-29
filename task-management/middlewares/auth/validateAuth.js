@@ -13,11 +13,8 @@ const validateAuth = (req, res, next) => {
         error: true,
         message: 'Username, email y password son obligatorios para registro'
       })
-    }
-  }
-
-  // Para login, verifica email y password
-  else if (req.path.includes('/login')) {
+    } // Para login, verifica email y password
+  } else if (req.path.includes('/login')) {
     if (!email || !password) {
       console.log('[validateAuth] Error en login: Faltan campos')
       return res.status(400).json({
