@@ -7,20 +7,10 @@ import corsMiddleware from './task-management/middlewares/security/corsMiddlewar
 import handlePreflight from './task-management/middlewares/security/handlePreflight.js'
 import applyMiddlewares from './task-management/middlewares/express/expressMiddleware.js'
 import { sendEmail } from './task-management/controllers/emails/emailController.js'
-import { getUserPortfolios } from './task-management/controllers/portfolio/getPortfolio.js'
-import { addCartera } from './task-management/controllers/cartera/addCartera.js'
-import { borraCartera } from './task-management/controllers/cartera/borraCartera.js'
-import { deleteAccion } from './task-management/controllers/acciones/deleteAccion.js'
-import { addAccion } from './task-management/controllers/acciones/addAccion.js'
-import { getAcciones } from './task-management/controllers/acciones/getAcciones.js'
-import { verifAccion } from './task-management/controllers/acciones/verifAccion.js'
-import { actualizaAccion } from './task-management/controllers/acciones/actualizaAccion.js'
-import { addNoticias } from './task-management/controllers/noticias/addNoticias.js'
-import { getIndices } from './task-management/controllers/indices/getIndices.js'
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import { init } from './socket/socketserver.js'
-import http from 'http' // Importar http para crear el servidor
+import http from 'http'
 import cookieParser from 'cookie-parser'
 
 dotenv.config()
@@ -114,49 +104,6 @@ async function crearAdminPorDefecto() {
     }
   }
 }
-
-// =====================================
-// Rutas para manejo de portfolios
-// =====================================
-
-//Ruta para obtener las carteras del usuario logueado
-app.get('/portfolios', getUserPortfolios)
-
-//Ruta para agregar una cartera nueva al Portfolio
-app.post('/portfolios/', addCartera)
-
-//Ruta para borrar una cartera del Portfolio
-app.delete('/portfolios/:userId/:portfolioName', borraCartera)
-
-//Ruta para eliminar una accion de una cartera
-app.delete('/portfolios/:userId/:portfolioName/stock/:ticker', deleteAccion)
-
-//Ruta para agregar una accion a una cartera
-app.post('/portfolios/:portfolioId/stock', addAccion)
-
-// Ruta para obtener el listado de todas las acciones disponibles para operar
-app.get('/accions/', getAcciones)
-
-//Ruta para buscar si una accion existe en el portfolio
-app.get('/portfolios/:portfolioId/stock/:ticker', verifAccion)
-
-// Ruta para actualizar una acción existente en el portfolio
-app.put('/portfolios/:portfolioId/stock/:ticker', actualizaAccion)
-
-//=====================================
-//Ruta para guardar las noticias
-app.post('/noticias', addNoticias)
-
-//Ruta permitir peticiones desde el frontend
-//Las peticiones a Finnhub se haran desde aqui, dado que
-//Finnhub no tiene configurados los encabezados CORS necesarios para permitir solicitudes
-//desde mi front y me daria problemas de Cors
-
-// ========================
-// Ruta proxy para Finnhub
-// ========================
-app.get('/api/quote/', getIndices)
-
 // =====================================
 // Rutas para saber que ya esta operativo el servidor en render
 // =====================================
