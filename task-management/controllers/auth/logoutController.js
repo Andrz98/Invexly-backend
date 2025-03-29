@@ -1,6 +1,6 @@
 const logout = async (req, res) => {
   try {
-    res.header('Access-Control-Allow-Origin', 'https://aqtrade.netlify.app')
+    res.header('Access-Control-Allow-Origin', 'https://invexly.netlify.app/')
     res.header('Access-Control-Allow-Credentials', 'true')
 
     // Recuperamos el token desde cookies o desde el header Authorization

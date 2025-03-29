@@ -1,4 +1,4 @@
-const allowedOrigin = 'https://aqtrade.netlify.app'
+const allowedOrigin = 'https://invexly.netlify.app/'
 
 const handlePreflight = (req, res, next) => {
   if (req.method === 'OPTIONS') {
