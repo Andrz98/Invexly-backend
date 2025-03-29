@@ -1,7 +1,3 @@
-// ========================
-// Middleware: Validar Datos de Autenticación
-// ========================
-
 const validateAuth = (req, res, next) => {
   console.log('[validateAuth] Inicio de la validación')
   console.log('[validateAuth] req.body recibido:', req.body)
@@ -19,6 +15,7 @@ const validateAuth = (req, res, next) => {
       })
     }
   }
+
   // Para login, verifica email y password
   else if (req.path.includes('/login')) {
     if (!email || !password) {
