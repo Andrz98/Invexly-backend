@@ -1,6 +1,6 @@
 import cors from 'cors'
 
-const allowedOrigins = ['https://invexly.netlify.app/']
+const allowedOrigins = ['https://invexly.netlify.app']
 
 const corsOptions = {
   origin: function (origin, callback) {
