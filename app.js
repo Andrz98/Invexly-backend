@@ -34,7 +34,7 @@ app.use(cookieParser())
 applyMiddlewares(app) // Aplica middlewares generales
 app.use(corsMiddleware) // Aplica CORS antes de definir rutas
 app.use((req, res, next) => {
-  const allowedOrigin = 'https://aqtrade.netlify.app'
+  const allowedOrigin = 'https://invexly.netlify.app'
   res.header('Access-Control-Allow-Origin', allowedOrigin)
   res.header('Access-Control-Allow-Credentials', 'true')
   res.header('Vary', 'Origin')
