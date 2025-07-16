@@ -9,8 +9,6 @@ import applyMiddlewares from './task-management/middlewares/express/expressMiddl
 import { sendEmail } from './task-management/controllers/emails/emailController.js'
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
-import { init } from './socket/socketserver.js'
-import http from 'http'
 import cookieParser from 'cookie-parser'
 
 dotenv.config()
@@ -20,8 +18,6 @@ dotenv.config()
 // ===================================
 const app = express()
 const port = process.env.PORT || 8080
-// Crear el servidor HTTP explícitamente, para poder iniciar WebSockets
-const server = http.createServer(app)
 
 // =====================================
 // Middleware para parsear cookies
@@ -187,10 +183,8 @@ app._router.stack.forEach((r) => {
 // Inicio del Servidor e inicialización de WebSocket
 // =====================================
 if (process.env.NODE_ENV !== 'test') {
-  server.listen(port, () => {
+  app.listen(port, () => {
     console.log(`🛰️ Entorno: ${process.env.NODE_ENV}`)
-    // Inicializar Socket.io con el servidor HTTP
-    init(server)
   })
 }
 
