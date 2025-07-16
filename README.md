@@ -8,7 +8,6 @@ Este repositorio implementa un servidor **Node.js** basado en **Express** para l
 - **Gestión de perfiles.** Operaciones para actualizar nombre de usuario, correo, contraseña e imagen de perfil.
 - **Envío de correos con Brevo.** Configuración de la API en `brevo.js` para mandar correos transaccionales.
 - **Almacenamiento de imágenes en Cloudinary.** Integración mediante `cloudinary.js`.
-- **WebSockets con Socket.io.** Archivo `socketserver.js` para habilitar comunicación en tiempo real.
 - **Middleware de seguridad y registro.** Uso de CORS, Helmet y Morgan.
 - **Pruebas de integración.** Suite de pruebas con Vitest y Supertest.
 
