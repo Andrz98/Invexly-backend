@@ -18,7 +18,6 @@ El repositorio adopta una estructura orientada a la arquitectura MVC, distribuye
 - `app.js`: Punto de entrada de la aplicación y conexión a la base de datos.
 - `task-management/`: Controladores, middlewares, rutas y configuraciones relacionadas.
 - `models/`: Definición de esquemas de usuario (Mongoose).
-- `socket/`: Inicialización y gestión de la comunicación en tiempo real vía Socket.io.
 - `test/`: Pruebas de integración.
 
 ## Prácticas de desarrollo responsables
@@ -30,7 +29,6 @@ El desarrollo del repositorio prioriza la legibilidad, la organización modular 
 - Express
 - Mongoose
 - JSON Web Token (JWT)
-- Socket.io
 - Brevo SDK (correo)
 - Cloudinary SDK (imágenes)
 - Helmet, CORS y Morgan (seguridad y logging)
