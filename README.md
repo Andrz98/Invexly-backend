@@ -1,38 +1,49 @@
-# Invexly Backend
+# Invexly Frontend
 
-Este repositorio implementa el backend de Invexly, un servidor Node.js construido con Express, orientado a la gestión de usuarios y comunicación en tiempo real. El proyecto utiliza MongoDB como base de datos principal y sigue una arquitectura MVC (Modelo-Vista-Controlador) para maximizar la claridad y separación de responsabilidades. El código está organizado en carpetas funcionales, priorizando la legibilidad y el mantenimiento.
+Este repositorio implementa el frontend de Invexly, una aplicación web desarrollada con React y Vite. Su propósito es proporcionar una interfaz de usuario sencilla, moderna y segura para la autenticación y gestión de perfiles de usuario, en integración directa con el backend de Invexly.
 
 ## Descripción general
 
-- Autenticación y autorización mediante JWT. Las rutas principales de registro, inicio de sesión y validación de tokens se gestionan en `authRoutes.js` y emplean middlewares de seguridad.
-- Gestión de perfiles de usuario, incluyendo actualización de nombre, correo, contraseña e imagen de perfil.
-- Envío de correos electrónicos transaccionales a través de la API de Brevo (configurada en `brevo.js`).
-- Almacenamiento y gestión de imágenes de perfil mediante integración con Cloudinary (`cloudinary.js`).
-- Middleware de seguridad y registro de actividad a través de CORS, Helmet y Morgan.
-- Pruebas de integración que cubren rutas principales utilizando Vitest y Supertest.
+- Inicio de sesión y registro: El componente `AuthCard` centraliza ambos procesos, gestionando la validación de credenciales y mostrando mensajes claros sobre el resultado de cada acción.
+- Edición de perfil: La página `ProfilePage` permite actualizar datos personales (nombre, correo, contraseña) y gestionar el avatar del usuario, utilizando Cloudinary para el almacenamiento de imágenes.
+- Navegación protegida: El contexto de autenticación (`AuthProvider`) controla el estado de sesión y garantiza que las rutas sensibles (como `/dashboard` y `/profile`) solo sean accesibles para usuarios autenticados mediante el componente `PrivateRoute`.
+- Diseño responsive: Los estilos se gestionan con Tailwind CSS y DaisyUI, incorporando fuentes locales y utilidades para una experiencia visual adaptable en cualquier dispositivo.
+- Despliegue en Netlify: La configuración con `netlify.toml` y `_redirects` permite el correcto funcionamiento de la aplicación como SPA en producción.
+
+## Arquitectura y prácticas
+
+- Se ha implementado la arquitectura **Atomic Design** en la organización de componentes, facilitando la reutilización y la escalabilidad de la interfaz.
+- El flujo de autenticación prioriza la seguridad y la privacidad del usuario:
+  - La gestión de tokens y sesiones se realiza mediante cookies seguras y Context API.
+  - No se exponen datos privados o sensibles en el cliente ni en la consola del navegador. Los mensajes mostrados al usuario son controlados y no revelan información interna del sistema.
+  - El propósito es asegurar un inicio de sesión robusto, mantener la sesión activa durante el tiempo previsto y permitir al usuario reloguear correctamente, en sincronía con la lógica del backend.
+- El código y la estructura de carpetas están organizados para favorecer la legibilidad y el mantenimiento.
+
+## Pruebas y documentación de peticiones HTTP
+
+Para probar y documentar el flujo de autenticación y todas las peticiones HTTP (registro, login, actualización de perfil, subida de avatar y gestión de sesión), se han utilizado las siguientes herramientas:
+
+- **Postman**: Para crear, ejecutar y documentar colecciones de peticiones HTTP contra el backend, asegurando la correcta comunicación entre frontend y servidor.
+- **RapidAPI Client**: Para pruebas adicionales, validación de endpoints y análisis de respuestas de la API en tiempo real durante el desarrollo.
+
+Estas herramientas han permitido verificar el correcto funcionamiento y la seguridad en la interacción cliente-servidor.
 
 ## Organización del proyecto
+src/
+├── Components/ # Componentes organizados según Atomic Design (átomos, moléculas, organismos)
 
-El repositorio adopta una estructura orientada a la arquitectura MVC, distribuyendo la lógica en capas claras y separadas para facilitar la escalabilidad y la colaboración:
+├── context/ # Contexto global de autenticación y sesión
 
-- `app.js`: Punto de entrada de la aplicación y conexión a la base de datos.
-- `task-management/`: Controladores, middlewares, rutas y configuraciones relacionadas.
-- `models/`: Definición de esquemas de usuario (Mongoose).
-- `test/`: Pruebas de integración.
+├── pages/ # Vistas principales de la aplicación (Dashboard, Profile)
 
-## Prácticas de desarrollo responsables
+├── services/ # Llamadas a la API y lógica de comunicación con el backend
 
-El desarrollo del repositorio prioriza la legibilidad, la organización modular y la coherencia en la estructura de carpetas, siguiendo estándares profesionales para facilitar la colaboración y el mantenimiento a largo plazo.
+└── assets/ # Recursos estáticos (imágenes, fuentes)
+public/
+├── avatars/ # Avatares de ejemplo para selección de usuario
 
-## Dependencias principales
+└── fonts/ # Fuentes locales utilizadas en la UI
 
-- Express
-- Mongoose
-- JSON Web Token (JWT)
-- Brevo SDK (correo)
-- Cloudinary SDK (imágenes)
-- Helmet, CORS y Morgan (seguridad y logging)
-- Vitest y Supertest (pruebas)
 
 ## Mantenimiento del formato y control de calidad
 
@@ -46,12 +57,30 @@ Estos scripts, definidos en `package.json`, permiten mantener la calidad y legib
 
 ## Scripts principales
 
-- `"start": "node app.js"`
-- `"lint": "eslint ."`
-- `"lint:fix": "eslint . --fix"`
-- `"format": "prettier --write ."`
-- `"test": "vitest"`
+- `"dev"`: inicia el entorno de desarrollo con Vite
+- `"build"`: compila la aplicación para producción
+- `"preview"`: sirve una versión estática del build
+- `"lint"`: revisa el código con ESLint y Prettier
+
+## Dependencias destacadas
+
+- React 18
+- React Router DOM
+- Axios
+- React Toastify
+- Lucide React
+- Headless UI
+- DaisyUI y Tailwind CSS
+- Vite Plugin Static Copy
+
+## Notas de despliegue
+
+La configuración de Netlify incluye:
+
+- Un archivo `netlify.toml` que redirige todas las rutas (`/*`) a `index.html`, asegurando el correcto funcionamiento de la SPA en producción.
+- El archivo `_redirects` se copia automáticamente a la carpeta de distribución durante el proceso de build mediante `vite-plugin-static-copy`.
 
 ## Consideraciones
 
-Este backend constituye una base profesional para aplicaciones que requieren autenticación, gestión de usuarios y comunicación en tiempo real, demostrando integración con servicios externos, pruebas automatizadas y un compromiso con prácticas responsables de desarrollo y organización del código.
+Este frontend está diseñado para ofrecer una experiencia de usuario segura, modular y eficiente, demostrando integración efectiva con el backend de Invexly, adopción de prácticas modernas de organización del código y un enfoque estricto en la privacidad y seguridad de la información del usuario.
+
