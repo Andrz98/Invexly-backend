@@ -28,7 +28,7 @@ Para probar y documentar el flujo de autenticación y todas las peticiones HTTP 
 
 Estas herramientas han permitido verificar el correcto funcionamiento y la seguridad en la interacción cliente-servidor.
 
-## Estructura del Proyecto
+## Estructura del Proyecto (simplificada)
 
 ```
 src/
