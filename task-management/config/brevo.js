@@ -36,50 +36,7 @@ export const configureBrevoAPI = () => {
   }
 }
 
-// Función de envío de email
-export const sendEmail = async (options = {}) => {
-  try {
-    // Validación de parámetros
-    if (!options.to || !options.to.email) {
-      throw new Error('Destinatario (email) es obligatorio')
-    }
+// Instancia única de la API para reutilizar en toda la aplicación
+const brevoApiInstance = configureBrevoAPI()
 
-    // Configurar instancia de API
-    const apiInstance = configureBrevoAPI()
-
-    // Preparar email con formato correcto
-    const sendSmtpEmail = new Brevo.SendSmtpEmail({
-      subject: options.subject || 'Bienvenido a TrendPulse',
-      htmlContent:
-        options.htmlContent ||
-        '<html><body><h1>Gracias por registrarte</h1></body></html>',
-      sender: {
-        name: options.sender?.name || process.env.EMAIL_SENDER_NAME || 'Admin',
-        email:
-          options.sender?.email ||
-          process.env.EMAIL_SENDER_ADDRESS ||
-          'equipoverde237@gmail.com'
-      },
-      // Formato correcto para destinatarios
-      to: [
-        {
-          email: options.to.email,
-          name: options.to.name || 'Usuario'
-        }
-      ]
-    })
-
-    // Envío de email
-    const response = await apiInstance.sendTransacEmail(sendSmtpEmail)
-    console.log('Email enviado con éxito:', response)
-    return response
-  } catch (error) {
-    console.error('Error en el envío de email:', {
-      message: error.message,
-      response: error.response?.data
-    })
-    throw new Error(`Hubo un problema enviando el email: ${error.message}`)
-  }
-}
-
-export default { sendEmail, configureBrevoAPI }
+export default brevoApiInstance
