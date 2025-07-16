@@ -32,33 +32,32 @@ Estas herramientas han permitido verificar el correcto funcionamiento y la segur
 
 ```
 src/
-├── Components/
-│   ├── Atoms/
-│   │   └── Button.jsx
-│   ├── Molecules/
-│   │   └── AuthCard.jsx
-│   ├── Organisms/
-│   │   └── ProfileForm.jsx
-├── context/
-│   ├── AuthProvider.jsx
-│   └── ThemeContext.jsx
-├── pages/
-│   ├── Dashboard.jsx
-│   └── ProfilePage.jsx
+├── config/
+│   ├── brevo.js
+│   ├── cloudinary.js
+│   └── index.js
+├── controllers/
+│   ├── authController.js
+│   └── userController.js
+├── middlewares/
+│   ├── authMiddleware.js
+│   ├── errorHandler.js
+│   └── securityMiddleware.js
+├── models/
+│   └── User.js
+├── routes/
+│   ├── authRoutes.js
+│   └── userRoutes.js
 ├── services/
-│   ├── api.js
-│   └── userService.js
-└── assets/
-    ├── images/
-    │   └── logo.png
-    └── fonts/
-        └── PlayfairDisplay-Regular.ttf
-
-public/
-├── avatars/
-│   └── avatar-default.png
-└── fonts/
-    └── PlayfairDisplay-Bold.ttf
+│   └── emailService.js
+├── socket/
+│   └── index.js
+├── test/
+│   ├── auth.test.js
+│   └── user.test.js
+├── utils/
+│   └── tokenUtils.js
+└── app.js
 ```
 ---
 
