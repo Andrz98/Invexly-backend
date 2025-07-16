@@ -1,12 +1,16 @@
-const allowedOrigin = 'https://invexly.netlify.app/'
+// =========================================
+// Lista de orígenes permitidos
+// =========================================
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
+  : []
 
 const handlePreflight = (req, res, next) => {
   if (req.method === 'OPTIONS') {
     const origin = req.headers.origin
 
-    if (origin === allowedOrigin) {
-      console.log('[Preflight] Solicitud OPTIONS recibida de Netlify')
-
+    if (!origin || allowedOrigins.includes(origin)) {
+      console.log(`[Preflight] Solicitud OPTIONS de origen permitido: ${origin}`)
       res.header('Access-Control-Allow-Origin', origin)
       res.header('Access-Control-Allow-Credentials', 'true')
       res.header(

@@ -95,3 +95,13 @@ La configuración de Netlify incluye:
 
 Este frontend está diseñado para ofrecer una experiencia de usuario segura, modular y eficiente, demostrando integración efectiva con el backend de Invexly, adopción de prácticas modernas de organización del código y un enfoque estricto en la privacidad y seguridad de la información del usuario.
 
+## Configuración de ALLOWED_ORIGINS
+
+Define en tu archivo `.env` los dominios autorizados para CORS. Usa la variable `ALLOWED_ORIGINS` con los dominios separados por comas:
+
+```bash
+ALLOWED_ORIGINS=https://invexly.netlify.app,https://localhost:3000
+```
+
+Los middlewares de CORS y preflight revisarán este listado para aceptar únicamente peticiones de orígenes permitidos.
+
