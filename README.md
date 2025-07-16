@@ -51,6 +51,9 @@ src/
 │   ├── login.test.js
 └── app.js
 ```
+
+El proyecto incluye además un directorio `utils/` con scripts de
+verificación de servicios externos (MongoDB, Brevo y Cloudinary).
 ---
 
 ## Mantenimiento del formato y control de calidad

@@ -1,5 +1,11 @@
 import cloudinary from '../task-management/config/cloudinary.js'
 
+/**
+ * Script de utilidad para comprobar la configuración de Cloudinary.
+ * Sube una imagen de prueba y muestra el resultado por consola para
+ * confirmar que las credenciales y la red funcionan correctamente.
+ */
+
 const testCloudinary = async () => {
   try {
     const result = await cloudinary.uploader.upload(
