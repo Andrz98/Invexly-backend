@@ -28,22 +28,39 @@ Para probar y documentar el flujo de autenticación y todas las peticiones HTTP 
 
 Estas herramientas han permitido verificar el correcto funcionamiento y la seguridad en la interacción cliente-servidor.
 
-## Organización del proyecto
+## Estructura del Proyecto
+
+```
 src/
-├── Components/ # Componentes organizados según Atomic Design (átomos, moléculas, organismos)
+├── Components/
+│   ├── Atoms/
+│   │   └── Button.jsx
+│   ├── Molecules/
+│   │   └── AuthCard.jsx
+│   ├── Organisms/
+│   │   └── ProfileForm.jsx
+├── context/
+│   ├── AuthProvider.jsx
+│   └── ThemeContext.jsx
+├── pages/
+│   ├── Dashboard.jsx
+│   └── ProfilePage.jsx
+├── services/
+│   ├── api.js
+│   └── userService.js
+└── assets/
+    ├── images/
+    │   └── logo.png
+    └── fonts/
+        └── PlayfairDisplay-Regular.ttf
 
-├── context/ # Contexto global de autenticación y sesión
-
-├── pages/ # Vistas principales de la aplicación (Dashboard, Profile)
-
-├── services/ # Llamadas a la API y lógica de comunicación con el backend
-
-└── assets/ # Recursos estáticos (imágenes, fuentes)
 public/
-├── avatars/ # Avatares de ejemplo para selección de usuario
-
-└── fonts/ # Fuentes locales utilizadas en la UI
-
+├── avatars/
+│   └── avatar-default.png
+└── fonts/
+    └── PlayfairDisplay-Bold.ttf
+```
+---
 
 ## Mantenimiento del formato y control de calidad
 
