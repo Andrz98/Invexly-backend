@@ -35,28 +35,20 @@ src/
 ├── config/
 │   ├── brevo.js
 │   ├── cloudinary.js
-│   └── index.js
+│   └── db.js
 ├── controllers/
 │   ├── authController.js
 │   └── userController.js
 ├── middlewares/
 │   ├── authMiddleware.js
 │   ├── errorHandler.js
-│   └── securityMiddleware.js
+│   └── corsHandle.js
 ├── models/
 │   └── User.js
 ├── routes/
 │   ├── authRoutes.js
-│   └── userRoutes.js
-├── services/
-│   └── emailService.js
-├── socket/
-│   └── index.js
 ├── test/
-│   ├── auth.test.js
-│   └── user.test.js
-├── utils/
-│   └── tokenUtils.js
+│   ├── login.test.js
 └── app.js
 ```
 ---
