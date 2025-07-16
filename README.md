@@ -1,41 +1,59 @@
-# Backend de Invexly
+# Invexly Backend
 
-Este repositorio implementa un servidor **Node.js** basado en **Express** para la gestión de usuarios y comunicación en tiempo real. El código se organiza en controladores y middlewares dentro de la carpeta `task-management` y utiliza **MongoDB** como base de datos.
+Este repositorio implementa el backend de Invexly, un servidor Node.js construido con Express, orientado a la gestión de usuarios y comunicación en tiempo real. El proyecto utiliza MongoDB como base de datos principal y sigue una arquitectura MVC (Modelo-Vista-Controlador) para maximizar la claridad y separación de responsabilidades. El código está organizado en carpetas funcionales, priorizando la legibilidad y el mantenimiento.
 
-## Características principales
+## Descripción general
 
-- **Autenticación con JWT.** Rutas para registro, inicio de sesión y validación de tokens. Las rutas se definen en `authRoutes.js` y utilizan middlewares de seguridad.
-- **Gestión de perfiles.** Operaciones para actualizar nombre de usuario, correo, contraseña e imagen de perfil.
-- **Envío de correos con Brevo.** Configuración de la API en `brevo.js` para mandar correos transaccionales.
-- **Almacenamiento de imágenes en Cloudinary.** Integración mediante `cloudinary.js`.
-- **Middleware de seguridad y registro.** Uso de CORS, Helmet y Morgan.
-- **Pruebas de integración.** Suite de pruebas con Vitest y Supertest.
+- Autenticación y autorización mediante JWT. Las rutas principales de registro, inicio de sesión y validación de tokens se gestionan en `authRoutes.js` y emplean middlewares de seguridad.
+- Gestión de perfiles de usuario, incluyendo actualización de nombre, correo, contraseña e imagen de perfil.
+- Envío de correos electrónicos transaccionales a través de la API de Brevo (configurada en `brevo.js`).
+- Almacenamiento y gestión de imágenes de perfil mediante integración con Cloudinary (`cloudinary.js`).
+- Middleware de seguridad y registro de actividad a través de CORS, Helmet y Morgan.
+- Pruebas de integración que cubren rutas principales utilizando Vitest y Supertest.
 
-## Scripts disponibles
+## Organización del proyecto
 
-Los scripts se encuentran en `package.json`:
+El repositorio adopta una estructura orientada a la arquitectura MVC, distribuyendo la lógica en capas claras y separadas para facilitar la escalabilidad y la colaboración:
 
-```json
-"start": "node app.js",
-"lint": "eslint .",
-"test": "vitest"
-```
+- `app.js`: Punto de entrada de la aplicación y conexión a la base de datos.
+- `task-management/`: Controladores, middlewares, rutas y configuraciones relacionadas.
+- `models/`: Definición de esquemas de usuario (Mongoose).
+- `socket/`: Inicialización y gestión de la comunicación en tiempo real vía Socket.io.
+- `test/`: Pruebas de integración.
 
-Para ejecutar el servidor de desarrollo se utiliza `npm start`; las pruebas se ejecutan con `npm test`.
+## Prácticas de desarrollo responsables
 
-## Estructura de carpetas
-
-- `app.js` – punto de entrada de la aplicación y conexión a base de datos.
-- `task-management/` – controladores, middlewares, rutas y configuraciones.
-- `models/` – definición del esquema `User` de Mongoose.
-- `socket/` – inicialización de Socket.io.
-- `test/` – pruebas de integración.
+El desarrollo del repositorio prioriza la legibilidad, la organización modular y la coherencia en la estructura de carpetas, siguiendo estándares profesionales para facilitar la colaboración y el mantenimiento a largo plazo.
 
 ## Dependencias principales
 
-El proyecto emplea Express, Mongoose, JWT, Socket.io y otras librerías incluidas en `package.json`.
+- Express
+- Mongoose
+- JSON Web Token (JWT)
+- Socket.io
+- Brevo SDK (correo)
+- Cloudinary SDK (imágenes)
+- Helmet, CORS y Morgan (seguridad y logging)
+- Vitest y Supertest (pruebas)
 
-## Variables de entorno
+## Mantenimiento del formato y control de calidad
 
-Se requieren variables como `MONGO_URI`, `JWT_SECRET`, `REFRESH_TOKEN_SECRET`, `BREVO_API_KEY` y credenciales de Cloudinary. Estos valores no están en el repositorio y deben configurarse antes de iniciar el servidor.
+El proyecto utiliza ESLint y Prettier para asegurar la consistencia del código y el cumplimiento de estándares definidos:
 
+- `"lint": "eslint ."` analiza el código y detecta incumplimientos de las reglas configuradas.
+- `"lint:fix": "eslint . --fix"` corrige automáticamente los errores identificados por ESLint.
+- `"format": "prettier --write ."` aplica el formato definido en las reglas de Prettier a todos los archivos.
+
+Estos scripts, definidos en `package.json`, permiten mantener la calidad y legibilidad del código a lo largo del ciclo de desarrollo, minimizando errores comunes y facilitando la colaboración.
+
+## Scripts principales
+
+- `"start": "node app.js"`
+- `"lint": "eslint ."`
+- `"lint:fix": "eslint . --fix"`
+- `"format": "prettier --write ."`
+- `"test": "vitest"`
+
+## Consideraciones
+
+Este backend constituye una base profesional para aplicaciones que requieren autenticación, gestión de usuarios y comunicación en tiempo real, demostrando integración con servicios externos, pruebas automatizadas y un compromiso con prácticas responsables de desarrollo y organización del código.
