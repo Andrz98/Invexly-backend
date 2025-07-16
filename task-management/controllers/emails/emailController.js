@@ -1,9 +1,14 @@
-import apiInstance from '../../config/brevo.js'
+import brevoApi from '../../config/brevo.js'
 import Brevo from '@getbrevo/brevo'
 
 // ========================================
 // Función para enviar correos electrónicos
 // ========================================
+/**
+ * Envía un correo utilizando la instancia configurada de Brevo.
+ * @param {Object} options - Opciones de configuración del correo.
+ * @returns {Promise<Object>} Respuesta de la API de Brevo.
+ */
 export const sendEmail = async (options = {}) => {
   try {
     console.log('JSON recibido en sendEmail:', JSON.stringify(options, null, 2))
@@ -57,7 +62,7 @@ export const sendEmail = async (options = {}) => {
     // =======================================================================
     // Enviar el correo
     // =======================================================================
-    const response = await apiInstance.sendTransacEmail(sendSmtpEmail)
+    const response = await brevoApi.sendTransacEmail(sendSmtpEmail)
     console.log('Email enviado con éxito:', response)
     return response
   } catch (error) {
