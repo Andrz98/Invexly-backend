@@ -5,8 +5,6 @@ import { sendEmail } from '../emails/emailController.js'
 
 const register = async (req, res) => {
   try {
-    res.header('Access-Control-Allow-Origin', 'https://invexly.netlify.app')
-    res.header('Access-Control-Allow-Credentials', 'true')
 
     const { username, email, password, profileImage } = req.body
 
