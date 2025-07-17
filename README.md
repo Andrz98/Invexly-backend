@@ -1,60 +1,76 @@
-# Invexly Frontend
+# Invexly Backend
 
-Este repositorio implementa el frontend de Invexly, una aplicación web desarrollada con React y Vite. Su propósito es proporcionar una interfaz de usuario sencilla, moderna y segura para la autenticación y gestión de perfiles de usuario, en integración directa con el backend de Invexly.
+Este repositorio implementa el backend de Invexly, una API REST desarrollada en Node.js y Express que gestiona la autenticación, el registro y la administración de usuarios. Se integra de forma directa y segura con el frontend de Invexly.
 
 ## Descripción general
 
-- Inicio de sesión y registro: El componente `AuthCard` centraliza ambos procesos, gestionando la validación de credenciales y mostrando mensajes claros sobre el resultado de cada acción.
-- Edición de perfil: La página `ProfilePage` permite actualizar datos personales (nombre, correo, contraseña) y gestionar el avatar del usuario, utilizando Cloudinary para el almacenamiento de imágenes.
-- Navegación protegida: El contexto de autenticación (`AuthProvider`) controla el estado de sesión y garantiza que las rutas sensibles (como `/dashboard` y `/profile`) solo sean accesibles para usuarios autenticados mediante el componente `PrivateRoute`.
-- Diseño responsive: Los estilos se gestionan con Tailwind CSS y DaisyUI, incorporando fuentes locales y utilidades para una experiencia visual adaptable en cualquier dispositivo.
-- Despliegue en Netlify: La configuración con `netlify.toml` y `_redirects` permite el correcto funcionamiento de la aplicación como SPA en producción.
+- **Registro y autenticación:**  
+  Permite el registro de nuevos usuarios, la autenticación con credenciales y la gestión de tokens de acceso. Las contraseñas se validan bajo criterios estrictos y se almacenan cifradas con bcrypt. El sistema utiliza JWT y cookies seguras (`httpOnly`, `secure`, `sameSite`) para manejar la sesión y la protección de la información.
+
+- **Gestión de perfiles:**  
+  Los usuarios pueden actualizar su nombre, correo electrónico, contraseña y avatar. Las imágenes de perfil se almacenan y gestionan a través de Cloudinary.
+
+- **Middleware y seguridad:**  
+  Se emplean middlewares como helmet para fortalecer las cabeceras HTTP, cors para restringir orígenes y morgan para registrar accesos. El control de CORS se realiza mediante dominios definidos en variables de entorno, asegurando que solo los orígenes autorizados puedan comunicarse con la API.
+
+- **Notificaciones por correo:**  
+  Brevo (Sendinblue) se utiliza para enviar correos transaccionales y de bienvenida tras el registro.
+
+- **Pruebas automatizadas:**  
+  El proyecto incluye pruebas con Vitest y Supertest que validan los principales flujos de autenticación, gestión de perfil y cierre de sesión.
 
 ## Arquitectura y prácticas
 
-- Se ha implementado la arquitectura **Atomic Design** en la organización de componentes, facilitando la reutilización y la escalabilidad de la interfaz.
-- El flujo de autenticación prioriza la seguridad y la privacidad del usuario:
-  - La gestión de tokens y sesiones se realiza mediante cookies seguras y Context API.
-  - No se exponen datos privados o sensibles en el cliente ni en la consola del navegador. Los mensajes mostrados al usuario son controlados y no revelan información interna del sistema.
-  - El propósito es asegurar un inicio de sesión robusto, mantener la sesión activa durante el tiempo previsto y permitir al usuario reloguear correctamente, en sincronía con la lógica del backend.
-- El código y la estructura de carpetas están organizados para favorecer la legibilidad y el mantenimiento.
+- **Arquitectura MVC:**  
+  El código está organizado bajo el patrón Modelo-Vista-Controlador, facilitando el mantenimiento y la escalabilidad.
+
+- **Validación y protección:**  
+  Todas las entradas de usuario se validan antes de procesarse. Las contraseñas nunca se almacenan en texto plano y los tokens solo se exponen en cookies protegidas.
+
+- **Control de calidad:**  
+  Se emplean ESLint y Prettier para asegurar la consistencia y calidad del código. Los scripts definidos en `package.json` permiten analizar, corregir y formatear automáticamente el código.
+
+- **Integración y despliegue:**  
+  El backend está preparado para desplegarse en Render y se integra de forma segura con el frontend desplegado en Netlify. El control de CORS y la gestión de orígenes se realiza mediante la variable de entorno `ALLOWED_ORIGINS`.
 
 ## Pruebas y documentación de peticiones HTTP
 
-Para probar y documentar el flujo de autenticación y todas las peticiones HTTP (registro, login, actualización de perfil, subida de avatar y gestión de sesión), se han utilizado las siguientes herramientas:
+- **Postman:**  
+  Colecciones para validar y documentar flujos de autenticación, gestión de usuario y subida de avatar.
 
-- **Postman**: Para crear, ejecutar y documentar colecciones de peticiones HTTP contra el backend, asegurando la correcta comunicación entre frontend y servidor.
-- **RapidAPI Client**: Para pruebas adicionales, validación de endpoints y análisis de respuestas de la API en tiempo real durante el desarrollo.
+- **RapidAPI Client:**  
+  Pruebas y validación de endpoints en tiempo real durante el desarrollo, facilitando la iteración y el debugging.
 
-Estas herramientas han permitido verificar el correcto funcionamiento y la seguridad en la interacción cliente-servidor.
-
-## Estructura del Proyecto (simplificada)
+## Estructura del Proyecto
 
 ```
 src/
 ├── config/
-│   ├── brevo.js
-│   ├── cloudinary.js
-│   └── db.js
+│ ├── brevo.js
+│ ├── cloudinary.js
+│ └── db.js
 ├── controllers/
-│   ├── authController.js
-│   └── userController.js
+│ ├── authController.js
+│ └── userController.js
 ├── middlewares/
-│   ├── authMiddleware.js
-│   ├── errorHandler.js
-│   └── corsHandle.js
+│ ├── authMiddleware.js
+│ ├── errorHandler.js
+│ └── corsHandle.js
 ├── models/
-│   └── User.js
+│ └── User.js
 ├── routes/
-│   ├── authRoutes.js
+│ ├── authRoutes.js
+│ └── userRoutes.js
 ├── test/
-│   ├── login.test.js
+│ ├── login.test.js
+│ └── profile.test.js
 └── app.js
-```
 
-El proyecto incluye además un directorio `utils/` con scripts de
-verificación de servicios externos (MongoDB, Brevo y Cloudinary).
+```
 ---
+
+
+Además, existe un directorio `utils/` para scripts de verificación y utilidades (conexión a MongoDB, Brevo, Cloudinary, etc).
 
 ## Mantenimiento del formato y control de calidad
 
@@ -64,44 +80,37 @@ El proyecto utiliza ESLint y Prettier para asegurar la consistencia del código 
 - `"lint:fix": "eslint . --fix"` corrige automáticamente los errores identificados por ESLint.
 - `"format": "prettier --write ."` aplica el formato definido en las reglas de Prettier a todos los archivos.
 
-Estos scripts, definidos en `package.json`, permiten mantener la calidad y legibilidad del código a lo largo del ciclo de desarrollo, minimizando errores comunes y facilitando la colaboración.
-
 ## Scripts principales
 
-- `"dev"`: inicia el entorno de desarrollo con Vite
-- `"build"`: compila la aplicación para producción
-- `"preview"`: sirve una versión estática del build
-- `"lint"`: revisa el código con ESLint y Prettier
+- `"start"`: ejecuta el servidor principal (`node app.js`)
+- `"dev"`: inicia el entorno de desarrollo con Nodemon
+- `"test"`: ejecuta la suite de pruebas con Vitest
+- `"test:coverage"`: muestra el reporte de cobertura de pruebas con Vitest
 
 ## Dependencias destacadas
 
-- React
-- React Router DOM
-- Axios
-- React Toastify
-- Lucide React
-- Headless UI
-- DaisyUI y Tailwind CSS
-- Vite Plugin Static Copy
+- Express
+- Mongoose
+- bcrypt
+- jsonwebtoken (JWT)
+- Cloudinary
+- Brevo
+- ESLint
+- Prettier
+- Vitest
+- Supertest
+- Morgan
+- Helmet
+- CORS
+- Nodemon
 
-## Notas de despliegue
+## Despliegue y configuración
 
-La configuración de Netlify incluye:
-
-- Un archivo `netlify.toml` que redirige todas las rutas (`/*`) a `index.html`, asegurando el correcto funcionamiento de la SPA en producción.
-- El archivo `_redirects` se copia automáticamente a la carpeta de distribución durante el proceso de build mediante `vite-plugin-static-copy`.
+El backend se despliega en Render y acepta conexiones solo de dominios definidos en la variable de entorno `ALLOWED_ORIGINS`.  
+Variables obligatorias: `MONGO_URI`, `JWT_SECRET`, `REFRESH_TOKEN_SECRET`, `BREVO_API_KEY` y credenciales de Cloudinary.
 
 ## Consideraciones
 
-Este frontend está diseñado para ofrecer una experiencia de usuario segura, modular y eficiente, demostrando integración efectiva con el backend de Invexly, adopción de prácticas modernas de organización del código y un enfoque estricto en la privacidad y seguridad de la información del usuario.
-
-## Configuración de ALLOWED_ORIGINS
-
-Define en tu archivo `.env` los dominios autorizados para CORS. Usa la variable `ALLOWED_ORIGINS` con los dominios separados por comas:
-
-```bash
-ALLOWED_ORIGINS=https://invexly.netlify.app,https://localhost:3000
-```
-
-Los middlewares de CORS y preflight revisarán este listado para aceptar únicamente peticiones de orígenes permitidos.
+Este backend proporciona una solución robusta para la autenticación y gestión de usuarios, con especial énfasis en la seguridad, el mantenimiento y la integración efectiva con el frontend de Invexly.  
+La estructura modular, las prácticas de calidad y la cobertura de pruebas aseguran que el proyecto sea confiable, escalable y fácil de mantener.
 
