@@ -2,9 +2,7 @@ import jwt from 'jsonwebtoken'
 import User from '../../../models/user.js'
 
 const validateToken = async (req, res) => {
-  // Se añaden cabeceras CORS necesarias para Render y Netlify
-  res.header('Access-Control-Allow-Origin', 'https://invexly.netlify.app/')
-  res.header('Access-Control-Allow-Credentials', 'true')
+  // Las cabeceras CORS se gestionan mediante middlewares dedicados
 
   try {
     const token =

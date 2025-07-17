@@ -7,9 +7,7 @@ import User from '../../../models/user.js'
  * @param {import('express').Response} res - Respuesta HTTP.
  */
 const refreshTokenController = async (req, res) => {
-  // Cabeceras CORS para mantener coherencia en todas las respuestas
-  res.header('Access-Control-Allow-Origin', 'https://invexly.netlify.app')
-  res.header('Access-Control-Allow-Credentials', 'true')
+  // Las cabeceras CORS se gestionan mediante los middlewares globales
 
   const refreshTokenCookie = req.cookies.refreshToken
 
