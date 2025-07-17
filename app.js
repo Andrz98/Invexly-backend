@@ -33,13 +33,16 @@ app.use(handlePreflight) // Manejar solicitudes preflight (CORS OPTIONS)
 
 // =====================================
 // Middleware para depurar cookies recibidas
+// Solo se ejecuta en entorno de desarrollo
 // =====================================
-app.use((req, res, next) => {
-  console.log('Cookies recibidas:', req.cookies) // Log estándar de cookies
-  console.log('Headers de la solicitud:', req.headers) // Log de todas las cabeceras
-  console.log('Header Cookie:', req.headers.cookie) // Muestra lo que realmente se envía en el header "Cookie"
-  next()
-})
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log('Cookies recibidas:', req.cookies) // Log estándar de cookies
+    console.log('Headers de la solicitud:', req.headers) // Log de todas las cabeceras
+    console.log('Header Cookie:', req.headers.cookie) // Muestra lo que realmente se envía en el header "Cookie"
+    next()
+  })
+}
 
 // =====================================
 // Conexión a la base de datos MongoDB
