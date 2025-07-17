@@ -5,8 +5,6 @@ import bcrypt from 'bcrypt'
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
-    console.log('Email recibido:', email)
-    console.log('Contraseña recibida:', password)
 
     if (!email || !password) {
       console.log('Validación activada: faltan credenciales') // console.log para vitest
@@ -18,7 +16,6 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: 'Credenciales incorrectas' }) // Evita enumeración de usuarios
     }
 
-    console.log('Contraseña almacenada:', user.password)
     const isMatch = await bcrypt.compare(password, user.password)
     console.log('¿Contraseña coincide?:', isMatch)
 
