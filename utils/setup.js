@@ -7,9 +7,16 @@ import mongoose from 'mongoose'
  * servidor de desarrollo.
  */
 
-const uri =
-  process.env.MONGO_TEST_URI ||
-  'mongodb+srv://andresdavidgr2898:FBeXisVBdldRBlfw@finance.v4nq4j2.mongodb.net/?retryWrites=true&w=majority&appName=Finance'
+/**
+ * Obtiene la URI de MongoDB desde la variable de entorno MONGO_TEST_URI.
+ * Si la variable no está definida, se informa del error y se detiene la ejecución.
+ */
+const uri = process.env.MONGO_TEST_URI
+
+if (!uri) {
+  console.error('❌ La variable de entorno MONGO_TEST_URI no está definida')
+  process.exit(1)
+}
 
 const testConnection = async () => {
   try {
