@@ -4,6 +4,12 @@ import Brevo from '@getbrevo/brevo'
 dotenv.config()
 
 export const configureBrevoAPI = () => {
+  console.log('=== DEBUG SMTP CONFIG ===')
+  console.log(
+    'process.env.BREVO_API_KEY:',
+    process.env.BREVO_API_KEY ? 'PRESENTE' : 'AUSENTE'
+  )
+
   console.log('Variables de entorno:', {
     BREVO_API_KEY: process.env.BREVO_API_KEY ? 'Presente' : 'Ausente',
     NODE_ENV: process.env.NODE_ENV
