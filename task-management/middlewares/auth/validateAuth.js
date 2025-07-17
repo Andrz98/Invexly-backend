@@ -1,7 +1,4 @@
 const validateAuth = (req, res, next) => {
-  console.log('[validateAuth] Inicio de la validación')
-  console.log('[validateAuth] req.body recibido:', req.body)
-
   const { username, email, password } = req.body
   console.log('[validateAuth] Datos extraídos:', { username, email, password })
 
