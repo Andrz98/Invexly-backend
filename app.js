@@ -1,5 +1,5 @@
 import express from 'express'
-import dotenv from 'dotenv'
+import dotenvFlow from 'dotenv-flow'
 import connectDB from './task-management/config/db.js'
 import authRoutes from './task-management/routes/authRoutes.js'
 import errorHandler from './task-management/middlewares/errors/errorHandler.js'
@@ -11,7 +11,7 @@ import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
 
-dotenv.config()
+dotenvFlow.config()
 
 // ===================================
 // Instancia express y puerto definido
