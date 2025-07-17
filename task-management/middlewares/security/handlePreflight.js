@@ -1,16 +1,11 @@
-// =========================================
-// Lista de orígenes permitidos
-// =========================================
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
-  : []
+import { isAllowedOrigin } from '../../utils/originUtils.js'
 
 const handlePreflight = (req, res, next) => {
   if (req.method === 'OPTIONS') {
     const origin = req.headers.origin
 
-    if (!origin || allowedOrigins.includes(origin)) {
-      console.log(`[Preflight] Solicitud OPTIONS de origen permitido: ${origin}`)
+    if (!origin || isAllowedOrigin(origin)) {
+      console.log(`[Preflight] Origin permitido: ${origin}`)
       res.header('Access-Control-Allow-Origin', origin)
       res.header('Access-Control-Allow-Credentials', 'true')
       res.header(
@@ -24,7 +19,7 @@ const handlePreflight = (req, res, next) => {
 
       return res.sendStatus(200)
     } else {
-      console.warn(`[Preflight] Origen bloqueado en producción: ${origin}`)
+      console.warn(`[Preflight] Origin bloqueado: ${origin}`)
       return res
         .status(403)
         .send('CORS policy: Origin no permitido en producción.')
