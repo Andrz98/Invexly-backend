@@ -1,4 +1,4 @@
-import { isAllowedOrigin } from '../../utils/originUtils.js'
+import { isAllowedOrigin } from '../../../utils/origins/originUtils.js'
 
 const handlePreflight = (req, res, next) => {
   if (req.method === 'OPTIONS') {
