@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isAllowedOrigin } from '../../task-management/middlewares/security/corsMiddleware.js'
+import { isAllowedOrigin } from '../../utils/origins/originUtils.js'
 
 describe('isAllowedOrigin', () => {
   it('permite origenes undefined', () => {
