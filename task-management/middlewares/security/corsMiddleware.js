@@ -1,19 +1,6 @@
-const allowedOrigins = ['https://invexly.netlify.app']
+import cors from 'cors'
+import corsOptions from '../../config/corsOptions.js'
 
-const corsMiddleware = {
-  origin: (origin, callback) => {
-    if (!origin) {
-      return callback(null, true)
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true)
-    }
-
-    // Producción: sin logs innecesarios
-    return callback(new Error('No autorizado por CORS'))
-  },
-  credentials: true
-}
+const corsMiddleware = cors(corsOptions) // Middleware para manejar CORS
 
 export default corsMiddleware

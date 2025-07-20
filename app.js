@@ -27,9 +27,9 @@ app.use(cookieParser())
 // =====================================
 // Aplicación de middlewares globales
 // =====================================
-applyMiddlewares(app) // Aplica middlewares generales
 app.use(corsMiddleware) // Aplica CORS antes de definir rutas
 app.use(handlePreflight) // Manejar solicitudes preflight (CORS OPTIONS)
+applyMiddlewares(app) // Aplica middlewares generales
 
 // =====================================
 // Middleware para depurar cookies recibidas
