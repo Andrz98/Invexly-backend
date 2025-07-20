@@ -3,7 +3,6 @@ const allowedOrigins = ['https://invexly.netlify.app']
 const corsMiddleware = {
   origin: (origin, callback) => {
     if (!origin) {
-      // Silencia requests sin Origin (ej: bots, Render healthchecks)
       return callback(null, true)
     }
 

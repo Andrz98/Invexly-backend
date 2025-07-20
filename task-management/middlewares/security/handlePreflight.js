@@ -27,7 +27,7 @@ const handlePreflight = (req, res, next) => {
     return res.sendStatus(403)
   }
 
-  // 🔁 Para métodos distintos de OPTIONS, continuar el flujo
+  // Para métodos distintos de OPTIONS, continuar el flujo
   return next()
 }
 
