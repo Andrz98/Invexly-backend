@@ -24,12 +24,11 @@ const handlePreflight = (req, res, next) => {
       return res.sendStatus(200)
     }
 
-    // En producción no se imprime nada, solo se rechaza.
     return res.sendStatus(403)
   }
 
-  // Continuar si no es una preflight request
-  next()
+  // 🔁 Para métodos distintos de OPTIONS, continuar el flujo
+  return next()
 }
 
 export default handlePreflight
