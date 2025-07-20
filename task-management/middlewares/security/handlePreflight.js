@@ -1,6 +1,12 @@
 import { isAllowedOrigin } from '../../../utils/origins/originUtils.js'
 
-const handlePreflight = (req, res, next) => {
+/**
+ * Maneja los errores capturados en la aplicación Express.
+ *
+ * @param {Error} err Error arrojado por la aplicación.
+ * @param {Request} req Objeto de solicitud HTTP.
+ */
+const handlePreflight = (req, res) => {
   if (req.method === 'OPTIONS') {
     const origin = req.headers.origin
 
@@ -25,8 +31,6 @@ const handlePreflight = (req, res, next) => {
         .send('CORS policy: Origin no permitido en producción.')
     }
   }
-
-  next()
 }
 
 export default handlePreflight
