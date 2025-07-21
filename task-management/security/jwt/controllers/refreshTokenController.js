@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import User from '../../../models/user.js'
+import User from '../../../../models/user.js'
 
 /**
  * Controlador que renueva el token de acceso utilizando el refresh token.
@@ -19,16 +19,10 @@ const refreshTokenController = async (req, res) => {
   let decoded
   try {
     // Verificación sincrónica del refresh token
-    decoded = jwt.verify(
-      refreshTokenCookie,
-      process.env.REFRESH_TOKEN_SECRET
-    )
+    decoded = jwt.verify(refreshTokenCookie, process.env.REFRESH_TOKEN_SECRET)
   } catch (error) {
-    return res
-      .status(403)
-      .json({ message: 'Refresh Token inválido o expirado' })
+    console.error('Error al verificar el refresh token:', error)
   }
-
   try {
     const user = await User.findById(decoded.id).select('-password')
 

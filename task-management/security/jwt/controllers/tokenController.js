@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import User from '../../../models/user.js'
+import User from '../../../../models/user.js'
 
 const validateToken = async (req, res) => {
   // Las cabeceras CORS se gestionan mediante middlewares dedicados
