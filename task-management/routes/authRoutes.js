@@ -14,8 +14,8 @@ import {
   updateAvatar
 } from '../controllers/user/profileController.js'
 
-import validateAuth from '../security/jwt/validateAuth.js'
-import authenticateToken from '../security/jwt/authenticateToken.js'
+import validateAuth from '../security/jwt/middlewares/validateAuth.js'
+import authenticateToken from '../security/jwt/middlewares/authenticateToken.js'
 
 const router = express.Router()
 
