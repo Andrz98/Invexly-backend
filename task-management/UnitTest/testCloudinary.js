@@ -1,4 +1,4 @@
-import cloudinary from '../../task-management/config/cloudinary.js'
+import cloudinary from '../config/cloudinary.js'
 
 /**
  * Script de utilidad para comprobar la configuración de Cloudinary.
