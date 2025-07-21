@@ -4,8 +4,8 @@ import multer from 'multer'
 import register from '../controllers/auth/registerController.js'
 import login from '../controllers/auth/loginController.js'
 import logout from '../controllers/auth/logoutController.js'
-import validateToken from '../controllers/auth/tokenController.js'
-import refreshToken from '../controllers/auth/refreshTokenController.js'
+import validateToken from '../security/jwt/tokenController.js'
+import refreshToken from '../security/jwt/refreshTokenController.js'
 import {
   getProfile,
   updateUsername,
@@ -14,8 +14,8 @@ import {
   updateAvatar
 } from '../controllers/user/profileController.js'
 
-import validateAuth from '../middlewares/auth/validateAuth.js'
-import authenticateToken from '../middlewares/auth/authenticateToken.js'
+import validateAuth from '../security/jwt/validateAuth.js'
+import authenticateToken from '../security/jwt/authenticateToken.js'
 
 const router = express.Router()
 
