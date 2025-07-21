@@ -1,9 +1,12 @@
 import jwt from 'jsonwebtoken'
 import User from '../../../../models/user.js'
 
-const validateToken = async (req, res) => {
-  // Las cabeceras CORS se gestionan mediante middlewares dedicados
-
+/**
+ * Controlador que valida un access token y devuelve el usuario.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
+const tokenController = async (req, res) => {
   try {
     const token =
       req.cookies.token ||
@@ -17,8 +20,8 @@ const validateToken = async (req, res) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET)
     } catch (error) {
-      console.error('Error al verificar el token:', error)
-      return res.status(401).json({ message: 'Token inválido o expirado' })
+      console.error('Token inválido:', error)
+      return res.status(403).json({ message: 'Token inválido o expirado' })
     }
 
     const user = await User.findById(decoded.id).select(
@@ -26,12 +29,10 @@ const validateToken = async (req, res) => {
     )
 
     if (!user) {
-      return res.status(401).json({ message: 'Usuario no encontrado' })
+      return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
-    console.log('Usuario devuelto en validateToken:', user)
-
-    res.status(200).json({
+    return res.status(200).json({
       user: {
         id: user._id,
         username: user.username,
@@ -41,11 +42,12 @@ const validateToken = async (req, res) => {
       }
     })
   } catch (error) {
-    console.error('Error en validateToken:', error)
-    res
-      .status(500)
-      .json({ message: 'Error en validación', error: error.message })
+    console.error('Error interno en tokenController:', error)
+    return res.status(500).json({
+      message: 'Error en la validación del token',
+      error: error.message
+    })
   }
 }
 
-export default validateToken
+export default tokenController

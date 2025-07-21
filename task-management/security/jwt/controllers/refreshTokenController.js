@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import User from '../../../../models/user.js'
+import { signAndSendAccessToken } from '../helpers/token/signAndSendAccessToken.js'
 
 /**
  * Controlador que renueva el token de acceso utilizando el refresh token.
@@ -7,22 +8,21 @@ import User from '../../../../models/user.js'
  * @param {import('express').Response} res - Respuesta HTTP.
  */
 const refreshTokenController = async (req, res) => {
-  // Las cabeceras CORS se gestionan mediante los middlewares globales
-
   const refreshTokenCookie = req.cookies.refreshToken
 
-  // Validación: se requiere el refresh token en cookies
+  // Validación: token debe estar presente
   if (!refreshTokenCookie) {
     return res.status(401).json({ message: 'Refresh Token no proporcionado' })
   }
 
   let decoded
   try {
-    // Verificación sincrónica del refresh token
     decoded = jwt.verify(refreshTokenCookie, process.env.REFRESH_TOKEN_SECRET)
   } catch (error) {
     console.error('Error al verificar el refresh token:', error)
+    return res.status(403).json({ message: 'Refresh Token inválido' })
   }
+
   try {
     const user = await User.findById(decoded.id).select('-password')
 
@@ -30,22 +30,11 @@ const refreshTokenController = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
-    const newAccessToken = jwt.sign(
-      { id: decoded.id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    )
-
-    res.cookie('token', newAccessToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      maxAge: 60 * 60 * 1000 // 1 hora
-    })
+    const accessToken = signAndSendAccessToken(res, user.id, '1h')
 
     return res.status(200).json({
       message: 'Token renovado',
-      accessToken: newAccessToken,
+      accessToken,
       user
     })
   } catch (error) {
