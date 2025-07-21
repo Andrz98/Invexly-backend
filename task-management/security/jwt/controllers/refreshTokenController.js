@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken'
 import User from '../../../../models/user.js'
 import { signAndSendAccessToken } from '../helpers/token/signAndSendAccessToken.js'
+import { verifyToken } from '../helpers/token/verifyToken.js'
 
 /**
  * Controlador que renueva el token de acceso utilizando el refresh token.
@@ -17,7 +17,7 @@ const refreshTokenController = async (req, res) => {
 
   let decoded
   try {
-    decoded = jwt.verify(refreshTokenCookie, process.env.REFRESH_TOKEN_SECRET)
+    decoded = verifyToken(refreshTokenCookie, process.env.REFRESH_TOKEN_SECRET)
   } catch (error) {
     console.error('Error al verificar el refresh token:', error)
     return res.status(403).json({ message: 'Refresh Token inválido' })

@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken'
 import User from '../../../../models/user.js'
+import { verifyToken } from '../helpers/token/verifyToken.js'
 
 /**
  * Controlador que valida un access token y devuelve el usuario.
@@ -18,10 +18,12 @@ const tokenController = async (req, res) => {
 
     let decoded
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET)
+      decoded = verifyToken(token, process.env.JWT_SECRET)
     } catch (error) {
       console.error('Token inválido:', error)
-      return res.status(403).json({ message: 'Token inválido o expirado' })
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message })
     }
 
     const user = await User.findById(decoded.id).select(

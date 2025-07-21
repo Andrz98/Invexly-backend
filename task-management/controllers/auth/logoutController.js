@@ -1,6 +1,5 @@
 const logout = async (req, res) => {
   try {
-
     // Recuperamos el token desde cookies o desde el header Authorization
     const tokenFromCookie = req.cookies.token
     const tokenFromHeader = req.headers.authorization?.split(' ')[1]
