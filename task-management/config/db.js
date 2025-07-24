@@ -3,7 +3,8 @@
 // =========================================
 
 import mongoose from 'mongoose'
-import logger from '../../../utils/winstonLogger/loggers.js'
+// Registro centralizado con Winston
+import logger from '../../utils/winstonLogger/loggers.js'
 
 const connectDB = async () => {
   try {
