@@ -1,4 +1,4 @@
-import { verifyToken } from '@/security/jwt/helpers/token/verifyToken.js'
+import { verifyToken } from '../helpers/token/verifyToken.js'
 
 /**
  * Middleware para autenticar usuarios mediante token JWT.
