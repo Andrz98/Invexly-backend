@@ -10,72 +10,59 @@ import { sendEmail } from './task-management/controllers/emails/emailController.
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
+import logger from '../../../utils/winstonLogger/loggers.js'
 
 dotenv.config()
 
-// ===================================
-// Instancia express y puerto definido
-// ===================================
 const app = express()
 const port = process.env.PORT || 8080
 
-// =====================================
-// Middleware para parsear cookies
-// =====================================
 app.use(cookieParser())
+app.use(corsMiddleware)
+app.use(handlePreflight)
+applyMiddlewares(app)
 
-// =====================================
-// Aplicación de middlewares globales
-// =====================================
-app.use(corsMiddleware) // Aplica CORS antes de definir rutas
-app.use(handlePreflight) // Manejar solicitudes preflight (CORS OPTIONS)
-applyMiddlewares(app) // Aplica middlewares generales
-
-// =====================================
-// Middleware para depurar cookies recibidas
-// Solo se ejecuta en entorno de desarrollo
-// =====================================
 if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
-    console.log('Cookies recibidas:', req.cookies) // Log estándar de cookies
-    console.log('Headers de la solicitud:', req.headers) // Log de todas las cabeceras
-    console.log('Header Cookie:', req.headers.cookie) // Muestra lo que realmente se envía en el header "Cookie"
+    logger.debug('Cookies recibidas:', req.cookies)
+    logger.debug('Headers de la solicitud:', req.headers)
+    logger.debug('Header Cookie:', req.headers.cookie)
     next()
   })
 }
 
-// =====================================
-// Conexión a la base de datos MongoDB
-// =====================================
 connectDB()
   .then(async () => {
-    console.log('🙂‍ Conexión a MongoDB establecida')
+    logger.info('🙂‍ Conexión a MongoDB establecida')
     await crearAdminPorDefecto()
   })
   .catch((error) => {
-    console.error('🤯 Error al conectar con MongoDB:', error)
+    logger.error('🤯 Error al conectar con MongoDB:', {
+      message: error.message,
+      stack: error.stack
+    })
     process.exit(1)
   })
 
-// ==============================================
-// Función para crear el administrador si no existe
-// ==============================================
 async function crearAdminPorDefecto() {
   try {
-    console.log('Verificando la existencia del usuario administrador...')
+    logger.info('Verificando la existencia del usuario administrador...')
     const existingAdmin = await User.findOne({ role: 'admin' })
+
     if (!existingAdmin) {
-      console.log('Creando usuario administrador...')
+      logger.info('Creando usuario administrador...')
+
       if (
         !process.env.ADMIN_EMAIL ||
         !process.env.ADMIN_PASSWORD ||
         !process.env.ADMIN_USERNAME
       ) {
-        console.error(
-          ' 🦽 ERROR: Faltan variables de entorno para el administrador'
+        logger.error(
+          '🦽 ERROR: Faltan variables de entorno para el administrador'
         )
         return
       }
+
       const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10)
       const admin = new User({
         username: process.env.ADMIN_USERNAME,
@@ -83,51 +70,42 @@ async function crearAdminPorDefecto() {
         password: hashedPassword,
         role: 'admin'
       })
+
       await admin.save()
-      console.log('😶‍🌫️ Usuario administrador creado con éxito')
+      logger.info('😶‍🌫️ Usuario administrador creado con éxito')
     } else {
-      console.log(
+      logger.info(
         '😉 Admin ya existe en la base de datos, no se ha creado uno nuevo'
       )
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('🦽 Error al crear el administrador:', error)
+      logger.error('🦽 Error al crear el administrador:', {
+        message: error.message,
+        stack: error.stack
+      })
     }
   }
 }
-// =====================================
-// Rutas para saber que ya esta operativo el servidor en render
-// =====================================
+
 app.get('/', (req, res) => {
   res.send('No esperes más, ya estoy listo🔛')
 })
 
-// =====================================
-// Rutas de la aplicación
-// =====================================
 app.use('/auth', authRoutes)
 
-// =====================================
-// Rutas de email sending
-// =====================================
 app.post('/send-email', async (req, res) => {
   try {
-    console.log(
-      'JSON recibido en /send-email:',
-      JSON.stringify(req.body, null, 2)
-    )
+    logger.debug('JSON recibido en /send-email:', req.body)
 
     const { to, subject, message, htmlContent } = req.body
 
-    // Validar que `to` sea un array y tenga al menos un destinatario
     if (!Array.isArray(to) || to.length === 0) {
       return res
         .status(400)
         .send('Error: Se requiere al menos un destinatario.')
     }
 
-    // Validar que cada destinatario tenga un email válido
     to.forEach((recipient) => {
       if (
         typeof recipient.email !== 'string' ||
@@ -141,7 +119,6 @@ app.post('/send-email', async (req, res) => {
       }
     })
 
-    // Hacemos la llamada a `sendEmail` desde `emailController`
     await sendEmail({
       to,
       subject: subject || 'Usuario registrado con éxito',
@@ -152,14 +129,14 @@ app.post('/send-email', async (req, res) => {
 
     res.send('Email enviado correctamente')
   } catch (error) {
-    console.error('Error al enviar el email', error)
+    logger.error('Error al enviar el email', {
+      message: error.message,
+      stack: error.stack
+    })
     res.status(500).send('Error al enviar el email')
   }
 })
 
-// =====================================
-// Middleware Global de Manejo de Errores
-// =====================================
 app.use(errorHandler)
 
 app.use((req, res, next) => {
@@ -171,16 +148,13 @@ app.use((req, res, next) => {
 
 app._router.stack.forEach((r) => {
   if (r.route && r.route.path) {
-    console.log(r.route.path)
+    logger.info(`Ruta registrada: ${r.route.path}`)
   }
 })
 
-// =====================================
-// Inicio del Servidor e inicialización de WebSocket
-// =====================================
 if (process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
-    console.log(`🛰️ Entorno: ${process.env.NODE_ENV}`)
+    logger.info(`🛰️ Entorno: ${process.env.NODE_ENV}`)
   })
 }
 
