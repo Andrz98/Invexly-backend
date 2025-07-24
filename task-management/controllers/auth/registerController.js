@@ -5,7 +5,6 @@ import { sendEmail } from '../emails/emailController.js'
 
 const register = async (req, res) => {
   try {
-
     const { username, email, password, profileImage } = req.body
 
     if (!username || !email || !password) {

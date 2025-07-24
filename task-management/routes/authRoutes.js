@@ -14,7 +14,12 @@ import {
   updateAvatar
 } from '../controllers/user/profileController.js'
 
-import validateAuth from '../middlewares/auth/validateAuth.js'
+import {
+  registerValidation,
+  loginValidation
+} from '../middlewares/auth/authValidator.js'
+import validateResult from '../middlewares/auth/validateResult.js'
+
 import authenticateToken from '../security/jwt/middlewares/authenticateToken.js'
 
 const router = express.Router()
@@ -24,8 +29,8 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
 // Rutas de Autenticación
-router.post('/register', validateAuth, register)
-router.post('/login', validateAuth, login)
+router.post('/register', registerValidation, validateResult, register)
+router.post('/login', loginValidation, validateResult, login)
 router.get('/validate-token', authenticateToken, validateToken)
 router.post('/logout', authenticateToken, logout)
 router.get('/profile', authenticateToken, getProfile)
