@@ -1,6 +1,5 @@
 import dotenv from 'dotenv'
 import Brevo from '@getbrevo/brevo'
-// Importar el logger centralizado
 import logger from '../../../utils/winstonLogger/loggers.js'
 
 dotenv.config()

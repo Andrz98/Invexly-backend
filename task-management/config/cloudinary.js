@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary'
 import dotenv from 'dotenv'
-// Importación del logger centralizado
 import logger from '../../../utils/winstonLogger/loggers.js'
 
 dotenv.config()

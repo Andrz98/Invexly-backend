@@ -3,7 +3,6 @@
 // =========================================
 
 import mongoose from 'mongoose'
-// Se importa el logger centralizado desde la capa utils
 import logger from '../../../utils/winstonLogger/loggers.js'
 
 const connectDB = async () => {
