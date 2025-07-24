@@ -12,7 +12,7 @@ const tokenController = async (req, res) => {
       (req.headers.authorization && req.headers.authorization.split(' ')[1])
 
     if (!token) {
-      logger.warn('🚫 Access token no proporcionado', {
+      logger.warn('Access token no proporcionado', {
         ip: req.ip,
         url: req.originalUrl,
         method: req.method
@@ -25,7 +25,7 @@ const tokenController = async (req, res) => {
     try {
       decoded = verifyToken(token, process.env.JWT_SECRET)
     } catch (error) {
-      logger.warn('❗ Access token inválido', {
+      logger.warn('Access token inválido', {
         ip: req.ip,
         tokenSnippet: token.slice(0, 10) + '...',
         errorMessage: error.message
@@ -41,14 +41,14 @@ const tokenController = async (req, res) => {
     )
 
     if (!user) {
-      logger.warn('🔍 Usuario no encontrado al validar token', {
+      logger.warn('Usuario no encontrado al validar token', {
         userId: decoded.id
       })
 
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
-    logger.info('✅ Access token validado correctamente', {
+    logger.info('Access token validado correctamente', {
       userId: user.id,
       ip: req.ip
     })
@@ -63,7 +63,7 @@ const tokenController = async (req, res) => {
       }
     })
   } catch (error) {
-    logger.error('❌ Error inesperado al validar access token', {
+    logger.error('Error inesperado al validar access token', {
       message: error.message,
       stack: error.stack
     })
