@@ -3,14 +3,25 @@
 // =========================================
 
 import mongoose from 'mongoose'
+// Se importa el logger centralizado desde la capa utils
+import logger from '../../../utils/winstonLogger/loggers.js'
 
 const connectDB = async () => {
   try {
-    console.log('Intentando conectar a MongoDB...')
+    // Log informativo previo a la conexión
+    logger.info('Intentando conectar a MongoDB...')
+
     await mongoose.connect(process.env.MONGO_URI)
-    console.log(`👾 MongoDB conectado en: ${mongoose.connection.host}`)
+
+    // Log de éxito con detalle del host conectado
+    logger.info(`👾 MongoDB conectado en: ${mongoose.connection.host}`)
   } catch (error) {
-    console.error(`😵‍💫 Error en la conexión a MongoDB: ${error.message}`)
+    // Log de error detallado con mensaje y stack trace
+    logger.error(`😵‍💫 Error en la conexión a MongoDB: ${error.message}`, {
+      stack: error.stack
+    })
+
+    // Detiene el proceso si no se logra conectar
     process.exit(1)
   }
 }
