@@ -10,11 +10,7 @@ import { sendEmail } from './task-management/controllers/emails/emailController.
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
-
-// =====================================
-// CSRF Middleware
-// =====================================
-import csrfValidator from './task-management/middlewares/security/csrfValidator.js'
+import csrfValidator from './task-management/security/csrfValidator/csrfValidator.js'
 
 dotenv.config()
 
