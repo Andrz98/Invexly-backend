@@ -29,7 +29,7 @@ const applyMiddlewares = (app) => {
     )
   }
 
-  logger.info('🧱 Middlewares de Express aplicados correctamente', {
+  logger.info('Middlewares de Express aplicados correctamente', {
     entorno: process.env.NODE_ENV
   })
 }
