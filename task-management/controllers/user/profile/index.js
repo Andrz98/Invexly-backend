@@ -1,5 +1,1 @@
-export { default as getProfile } from './getProfile.js'
-export { default as updateUsername } from './updateUsername.js'
-export { default as updateEmail } from './updateEmail.js'
-export { default as updatePassword } from './updatePassword.js'
-export { default as updateAvatar } from './updateAvatar.js'
+export * from './profileController.js'
