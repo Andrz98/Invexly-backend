@@ -3,13 +3,14 @@ import dotenv from 'dotenv'
 import connectDB from './task-management/config/db.js'
 import authRoutes from './task-management/routes/authRoutes.js'
 import errorHandler from './task-management/middlewares/errors/errorHandler.js'
-import corsMiddleware from './task-management/middlewares/security/corsMiddleware.js'
-import handlePreflight from './task-management/middlewares/security/handlePreflight.js'
+import corsMiddleware from './task-management/security/cors/middlewares/corsMiddleware.js'
+import handlePreflight from './task-management/security/preflight/handlePreflight.js'
 import applyMiddlewares from './task-management/middlewares/express/expressMiddleware.js'
 import { sendEmail } from './task-management/controllers/emails/emailController.js'
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
+import csrfValidator from './task-management/security/csrfValidator/csrfValidator.js'
 
 dotenv.config()
 
@@ -30,6 +31,24 @@ app.use(cookieParser())
 app.use(corsMiddleware) // Aplica CORS antes de definir rutas
 app.use(handlePreflight) // Manejar solicitudes preflight (CORS OPTIONS)
 applyMiddlewares(app) // Aplica middlewares generales
+
+// =====================================
+// Ruta pública para obtener token CSRF
+// =====================================
+app.get('/api/token/csrf', csrfValidator, (req, res) => {
+  const token = req.csrfToken()
+  res.cookie('XSRF-TOKEN', token)
+  console.log('[CSRF] Token CSRF generado y enviado')
+  res.status(200).json({ message: 'Token CSRF enviado correctamente' })
+})
+
+// =====================================
+// Protección CSRF en rutas sensibles (solo en producción)
+// =====================================
+if (process.env.NODE_ENV === 'production') {
+  app.use(['/api/profile', '/api/user'], csrfValidator)
+  app.use('/auth/logout', csrfValidator)
+}
 
 // =====================================
 // Middleware para depurar cookies recibidas
@@ -96,6 +115,7 @@ async function crearAdminPorDefecto() {
     }
   }
 }
+
 // =====================================
 // Rutas para saber que ya esta operativo el servidor en render
 // =====================================

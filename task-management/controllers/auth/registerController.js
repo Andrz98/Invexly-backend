@@ -2,58 +2,60 @@ import User from '../../../models/user.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { sendEmail } from '../emails/emailController.js'
+import logger from '../../../utils/winstonLogger/loggers.js'
 
 const register = async (req, res) => {
   try {
-
     const { username, email, password, profileImage } = req.body
+    const ip = req.ip
+    const userAgent = req.headers['user-agent']
 
     if (!username || !email || !password) {
-      console.log('Faltan datos obligatorios.')
+      logger.warn(
+        `[REGISTER] Faltan datos obligatorios | IP: ${ip} | UA: ${userAgent}`
+      )
       return res
         .status(400)
         .json({ message: 'Todos los campos son obligatorios' })
     }
 
-    console.log('Buscando si el usuario ya existe...')
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] })
+    logger.info(`[REGISTER] Intentando registrar: ${email} | IP: ${ip}`)
 
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] })
     if (existingUser) {
-      console.log('El usuario ya está registrado.')
+      logger.warn(`[REGISTER] Usuario ya registrado: ${email} | IP: ${ip}`)
       return res.status(400).json({ message: 'El usuario ya está registrado' })
     }
 
-    console.log('Validando contraseña antes de encriptar...')
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
     if (!passwordRegex.test(password)) {
-      console.log('Contraseña inválida.')
+      logger.warn(`[REGISTER] Contraseña débil para ${email} | IP: ${ip}`)
       return res.status(400).json({
         message: 'La contraseña no cumple con los requisitos de seguridad.'
       })
     }
 
-    console.log('Encriptando contraseña...')
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    console.log('Creando usuario en la base de datos...')
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
       role: 'user',
-      //profileImage: profileImage || 'https://res.cloudinary.com/dwsnf2wlr/image/upload/v1743014124/p83xds6yhage9eatibgm.jpg'
-      profileImage: profileImage
+      profileImage
     })
-    console.log('Correo a enviar1:', email)
 
-    // Aquí capturamos un error de calve duplicada desde MongoDB
     try {
       await newUser.save()
-      console.log('Usuario guardado correctamente en la base de datos')
+      logger.info(
+        `[REGISTER] Usuario registrado correctamente: ${email} | ID: ${newUser._id} | IP: ${ip}`
+      )
     } catch (error) {
       if (error.code === 11000) {
-        console.log('Error: usuario duplicado')
+        logger.warn(
+          `[REGISTER] Error duplicado en MongoDB para ${email} | IP: ${ip}`
+        )
         return res
           .status(400)
           .json({ message: 'El usuario ya está registrado' })
@@ -61,43 +63,39 @@ const register = async (req, res) => {
       throw error
     }
 
-    console.log('Generando Token JWT...')
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: '1h'
     })
-
-    console.log('Generando Refresh Token...')
     const refreshToken = jwt.sign(
       { id: newUser._id },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: '7d' }
     )
 
-    console.log('Configurando Cookies...')
     res.cookie('token', token, {
-      httpOnly: true, // Solo accesible por el navegador
-      secure: true, // Solo por HTTPS
-      sameSite: 'none', // Cross-site (Netlify + Render)
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
       path: '/',
-      maxAge: 60 * 60 * 1000 // 1 hora
+      maxAge: 60 * 60 * 1000
     })
 
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true, // Solo accesible por el navegador
-      secure: true, // Solo por HTTPS
-      sameSite: 'none', // Cross-site
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
       path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+      maxAge: 7 * 24 * 60 * 60 * 1000
     })
 
-    console.log('Enviando correo de bienvenida...')
     await sendEmail({
       to: [{ email, name: username }],
-      templateId: 2, // ID del template de bienvenida
+      templateId: 2,
       params: { username }
     })
 
-    console.log('Registro exitoso, enviando respuesta...')
+    logger.info(`[REGISTER] Email de bienvenida enviado a ${email}`)
+
     return res.status(201).json({
       message: 'Usuario registrado con éxito y email enviado correctamente',
       token,
@@ -105,7 +103,10 @@ const register = async (req, res) => {
       email: newUser.email
     })
   } catch (error) {
-    console.error('Error en el registro:', error)
+    logger.error(
+      `[REGISTER] Error inesperado para ${req.body.email || 'N/A'}: ${error.message}`,
+      { stack: error.stack }
+    )
 
     if (!res.headersSent) {
       return res

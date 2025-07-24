@@ -67,8 +67,8 @@ src/
 └── app.js
 
 ```
----
 
+---
 
 Además, existe un directorio `utils/` para scripts de verificación y utilidades (conexión a MongoDB, Brevo, Cloudinary, etc).
 
@@ -113,4 +113,3 @@ Variables obligatorias: `MONGO_URI`, `JWT_SECRET`, `REFRESH_TOKEN_SECRET`, `BREV
 
 Este backend proporciona una solución robusta para la autenticación y gestión de usuarios, con especial énfasis en la seguridad, el mantenimiento y la integración efectiva con el frontend de Invexly.  
 La estructura modular, las prácticas de calidad y la cobertura de pruebas aseguran que el proyecto sea confiable, escalable y fácil de mantener.
-

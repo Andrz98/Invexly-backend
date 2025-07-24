@@ -1,7 +1,9 @@
+import logger from '../../../utils/winstonLogger/loggers.js'
+
 const logout = async (req, res) => {
   try {
-
-    // Recuperamos el token desde cookies o desde el header Authorization
+    const ip = req.ip
+    const userAgent = req.headers['user-agent']
     const tokenFromCookie = req.cookies.token
     const tokenFromHeader = req.headers.authorization?.split(' ')[1]
     const refreshToken = req.cookies?.refreshToken
@@ -9,12 +11,11 @@ const logout = async (req, res) => {
     const hasToken = tokenFromCookie || tokenFromHeader
     const hasRefreshToken = !!refreshToken
 
-    // Si no hay token ni refreshToken, no hay sesión activa
     if (!hasToken && !hasRefreshToken) {
+      logger.warn(`[LOGOUT] Solicitud sin token | IP: ${ip} | UA: ${userAgent}`)
       return res.status(401).json({ message: 'Token no proporcionado' })
     }
 
-    // Borramos las cookies de autenticación
     res.clearCookie('token', {
       httpOnly: true,
       secure: true,
@@ -29,10 +30,15 @@ const logout = async (req, res) => {
       path: '/'
     })
 
-    // Devolvemos una respuesta exitosa
+    logger.info(
+      `[LOGOUT] Sesión cerrada correctamente | IP: ${ip} | UA: ${userAgent}`
+    )
+
     return res.status(200).json({ message: 'Sesión cerrada correctamente' })
   } catch (error) {
-    console.error('Error en logout:', error)
+    logger.error(`[LOGOUT] Error inesperado: ${error.message}`, {
+      stack: error.stack
+    })
     res.status(500).json({ message: 'Error en el servidor', error })
   }
 }

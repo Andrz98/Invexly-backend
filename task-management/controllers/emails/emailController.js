@@ -1,46 +1,32 @@
 import brevoApi from '../../config/brevo.js'
 import Brevo from '@getbrevo/brevo'
+import logger from '../../../utils/winstonLogger/loggers.js'
 
-// ========================================
-// Función para enviar correos electrónicos
-// ========================================
-/**
- * Envía un correo utilizando la instancia configurada de Brevo.
- * @param {Object} options - Opciones de configuración del correo.
- * @returns {Promise<Object>} Respuesta de la API de Brevo.
- */
 export const sendEmail = async (options = {}) => {
   try {
-    console.log('JSON recibido en sendEmail:', JSON.stringify(options, null, 2))
+    const recipientList = (options.to || []).map((r) => r.email).join(', ')
+    logger.info(`[EMAIL] Intentando enviar correo a: ${recipientList}`)
 
-    // =======================================================================
-    // Validar destinatarios antes de enviar el correo
-    // =======================================================================
+    // Validación básica
     if (!options.to || !Array.isArray(options.to) || options.to.length === 0) {
-      throw new Error(
-        // eslint-disable-next-line quotes
-        "Error: Se requiere al menos un destinatario en el campo 'to'."
-      )
+      logger.warn('[EMAIL] Error: Campo "to" faltante o vacío')
+      throw new Error('Se requiere al menos un destinatario en el campo "to".')
     }
 
-    // Verificar que cada destinatario tenga un email válido
     options.to.forEach((recipient) => {
       if (
         typeof recipient.email !== 'string' ||
         recipient.email.trim() === ''
       ) {
+        logger.warn(`[EMAIL] Email inválido: ${JSON.stringify(recipient)}`)
         throw new Error(
-          `Error: Email no válido para el destinatario ${JSON.stringify(recipient)}`
+          `Email no válido para el destinatario ${JSON.stringify(recipient)}`
         )
       }
     })
 
-    // =======================================================================
-    // Configurar el correo electrónico
-    // =======================================================================
     const sendSmtpEmail = new Brevo.SendSmtpEmail()
-
-    sendSmtpEmail.templateId = options.templateId || 2 // 2 es el número Id de la plantilla que he creado en Brevo
+    sendSmtpEmail.templateId = options.templateId || 2
     sendSmtpEmail.to = options.to
     sendSmtpEmail.params = options.params || {}
 
@@ -54,22 +40,20 @@ export const sendEmail = async (options = {}) => {
       name: 'Soporte'
     }
 
-    console.log(
-      'Configuración final del email:',
-      JSON.stringify(sendSmtpEmail, null, 2)
+    logger.debug(
+      `[EMAIL] Configuración final: ${JSON.stringify(sendSmtpEmail, null, 2)}`
     )
 
-    // =======================================================================
-    // Enviar el correo
-    // =======================================================================
     const response = await brevoApi.sendTransacEmail(sendSmtpEmail)
-    console.log('Email enviado con éxito:', response)
+    logger.info(`[EMAIL] Enviado correctamente a: ${recipientList}`)
+
     return response
   } catch (error) {
-    console.error('Error al enviar el email:', error)
+    logger.error(`[EMAIL] Fallo al enviar email: ${error.message}`, {
+      stack: error.stack
+    })
     throw new Error('Hubo un problema enviando el email: ' + error.message)
   }
 }
 
-// Exportar función para ser utilizada en otros módulos
 export default { sendEmail }
