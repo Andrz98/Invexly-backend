@@ -6,13 +6,14 @@ import login from '../controllers/auth/loginController.js'
 import logout from '../controllers/auth/logoutController.js'
 import validateToken from '../security/jwt/controllers/tokenController.js'
 import refreshToken from '../security/jwt/controllers/refreshTokenController.js'
+
 import {
   getProfile,
   updateUsername,
   updateEmail,
   updatePassword,
   updateAvatar
-} from '../controllers/user/profileController.js'
+} from '../controllers/user/profile/index.js'
 
 import {
   registerValidation,

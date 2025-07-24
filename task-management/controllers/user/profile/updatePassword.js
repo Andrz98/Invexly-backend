@@ -1,6 +1,6 @@
-import User from '../../../models/user.js'
+import User from '../../../../models/user.js'
 import bcrypt from 'bcrypt'
-import logger from '../../../utils/winstonLogger/loggers.js'
+import logger from '../../../../utils/winstonLogger/loggers.js'
 
 const updatePassword = async (req, res) => {
   try {

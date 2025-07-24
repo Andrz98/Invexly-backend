@@ -1,6 +1,6 @@
-import User from '../../../models/user.js'
-import cloudinary from '../../config/cloudinary.js'
-import logger from '../../../utils/winstonLogger/loggers.js'
+import User from '../../../../models/user.js'
+import cloudinary from '../../../config/cloudinary.js'
+import logger from '../../../../utils/winstonLogger/loggers.js'
 
 const updateAvatar = async (req, res) => {
   try {

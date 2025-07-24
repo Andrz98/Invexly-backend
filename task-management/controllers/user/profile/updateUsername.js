@@ -1,5 +1,5 @@
-import User from '../../../models/user.js'
-import logger from '../../../utils/winstonLogger/loggers.js'
+import User from '../../../../models/user.js'
+import logger from '../../../../utils/winstonLogger/loggers.js'
 
 const updateUsername = async (req, res) => {
   try {
