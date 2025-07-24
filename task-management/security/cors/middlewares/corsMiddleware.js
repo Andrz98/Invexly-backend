@@ -1,6 +1,6 @@
 import cors from 'cors'
 import corsOptions from '../config/corsOptions.js'
-import logger from '../../../utils/winstonLogger/loggers.js'
+import logger from '../../../../utils/logger.js'
 
 const corsMiddleware = cors(corsOptions)
 
