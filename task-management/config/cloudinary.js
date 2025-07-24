@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary'
 import dotenv from 'dotenv'
-import logger from '../../../utils/winstonLogger/loggers.js'
+// Registro centralizado con Winston
+import logger from '../../utils/winstonLogger/loggers.js'
 
 dotenv.config()
 
