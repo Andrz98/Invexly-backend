@@ -10,7 +10,7 @@ import { sendEmail } from './task-management/controllers/emails/emailController.
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
-import logger from '../../../utils/winstonLogger/loggers.js'
+import logger from './utils/winstonLogger/loggers.js'
 
 dotenv.config()
 
