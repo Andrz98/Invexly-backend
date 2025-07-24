@@ -47,6 +47,7 @@ app.get('/api/token/csrf', csrfValidator, (req, res) => {
 // =====================================
 if (process.env.NODE_ENV === 'production') {
   app.use(['/api/profile', '/api/user'], csrfValidator)
+  app.use('/auth/logout', csrfValidator)
 }
 
 // =====================================
