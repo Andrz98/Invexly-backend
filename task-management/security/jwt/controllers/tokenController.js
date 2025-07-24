@@ -1,10 +1,9 @@
 import User from '../../../../models/user.js'
 import { verifyToken } from '../helpers/token/verifyToken.js'
+import logger from '../../../../utils/winstonLogger/loggers.js'
 
 /**
  * Controlador que valida un access token y devuelve el usuario.
- * @param {import('express').Request} req
- * @param {import('express').Response} res
  */
 const tokenController = async (req, res) => {
   try {
@@ -13,6 +12,12 @@ const tokenController = async (req, res) => {
       (req.headers.authorization && req.headers.authorization.split(' ')[1])
 
     if (!token) {
+      logger.warn('🚫 Access token no proporcionado', {
+        ip: req.ip,
+        url: req.originalUrl,
+        method: req.method
+      })
+
       return res.status(401).json({ message: 'Token no proporcionado' })
     }
 
@@ -20,7 +25,12 @@ const tokenController = async (req, res) => {
     try {
       decoded = verifyToken(token, process.env.JWT_SECRET)
     } catch (error) {
-      console.error('Token inválido:', error)
+      logger.warn('❗ Access token inválido', {
+        ip: req.ip,
+        tokenSnippet: token.slice(0, 10) + '...',
+        errorMessage: error.message
+      })
+
       return res
         .status(error.statusCode || 500)
         .json({ message: error.message })
@@ -31,8 +41,17 @@ const tokenController = async (req, res) => {
     )
 
     if (!user) {
+      logger.warn('🔍 Usuario no encontrado al validar token', {
+        userId: decoded.id
+      })
+
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
+
+    logger.info('✅ Access token validado correctamente', {
+      userId: user.id,
+      ip: req.ip
+    })
 
     return res.status(200).json({
       user: {
@@ -44,7 +63,11 @@ const tokenController = async (req, res) => {
       }
     })
   } catch (error) {
-    console.error('Error interno en tokenController:', error)
+    logger.error('❌ Error inesperado al validar access token', {
+      message: error.message,
+      stack: error.stack
+    })
+
     return res.status(500).json({
       message: 'Error en la validación del token',
       error: error.message
