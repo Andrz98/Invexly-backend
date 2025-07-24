@@ -17,3 +17,5 @@ export const authenticateToken = (req, res, next) => {
     return res.status(error.statusCode || 403).json({ message: error.message })
   }
 }
+
+export default authenticateToken
