@@ -1,4 +1,4 @@
-import logger from '../../../../utils/winstonLogger/loggers.js'
+import logger from '../../../utils/winstonLogger/loggers.js'
 
 const allowedOrigins = [process.env.FRONTEND_URL]
 

@@ -1,6 +1,6 @@
 import { verifyToken } from '../helpers/token/verifyToken.js'
 
-import logger from '../../../../utils/winstonLogger/loggers.js'
+import logger from '../../../utils/winstonLogger/loggers.js'
 
 /**
  * Middleware para autenticar usuarios mediante token JWT.
