@@ -3,7 +3,7 @@ import {
   saveUser
 } from '../../../services/profileService/profileService.js'
 
-import { logger } from '../../../../utils/winstonLogger/loggers.js'
+import logger from '../../../../utils/winstonLogger/loggers.js'
 
 // Obtener perfil del usuario
 export const getProfile = async (req, res) => {
