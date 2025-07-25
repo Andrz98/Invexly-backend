@@ -1,9 +1,11 @@
-import csrfCsrf from 'csrf-csrf'
+import { createRequire } from 'module'
 import logger from '../../../../utils/winstonLogger/loggers.js'
 
-// Middleware completo de protección
-const doubleCsrfProtection = csrfCsrf.doubleCsrfProtection
+// Importar csrf-csrf como CommonJS -> La librería csrf-csrf no tiene soporte ESM
+const require = createRequire(import.meta.url)
+const { doubleCsrfProtection } = require('csrf-csrf')
 
+// Middleware completo de protección
 const csrfProtect = doubleCsrfProtection({
   getSecret: () => process.env.CSRF_SECRET || 'default_unsafe_csrf_secret',
   cookieName: '__Host-csrf-token',
