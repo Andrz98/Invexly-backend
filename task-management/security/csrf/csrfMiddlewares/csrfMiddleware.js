@@ -1,33 +1,47 @@
 import { createRequire } from 'module'
 import logger from '../../../../utils/winstonLogger/loggers.js'
 
-// Importar correctamente la librería como CommonJS -> crsf-csrf no soporta ESM directamente
+// Importación compatible con ESM para librería CommonJS
 const require = createRequire(import.meta.url)
-const { doubleCsrf } = require('csrf-csrf')
+const csrfCsrf = require('csrf-csrf')
 
-// Inicializa csrf-csrf correctamente con opciones
-const { doubleCsrfProtection, generateToken, validateRequest } = doubleCsrf({
-  getSecret: () => process.env.CSRF_SECRET || 'default_unsafe_csrf_secret',
-  cookieName: '__Host-csrf-token',
-  cookieOptions: {
-    sameSite: 'strict',
-    path: '/',
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: false // el frontend necesita poder leerla
-  },
-  getTokenFromRequest: (req) => req.headers['x-csrf-token']
-})
+// Depuración: verificación de carga de la librería
+logger.info('[CSRF DEBUG] Contenido de require("csrf-csrf"):', csrfCsrf)
+
+// Inicialización del sistema de protección CSRF
+const { doubleCsrfProtection, generateToken, validateRequest } =
+  csrfCsrf.doubleCsrf({
+    getSecret: () => process.env.CSRF_SECRET || 'debug_csrf_secret',
+    cookieName: '__Host-csrf-token',
+    cookieOptions: {
+      sameSite: 'strict',
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: false // necesario para que el frontend pueda leer la cookie
+    },
+    getTokenFromRequest: (req) => req.headers['x-csrf-token']
+  })
 
 // Middleware para emitir el token (y la cookie)
 export const csrfCookieMiddleware = (req, res) => {
-  generateToken(res) // <- Aquí es donde se lanzaba el error si no existía
-  logger.info('[CSRF] Token CSRF enviado correctamente')
-  res.status(200).json({ message: 'CSRF cookie enviada' })
+  logger.info('[CSRF DEBUG] csrfCookieMiddleware ejecutado')
+
+  try {
+    const token = generateToken(res)
+    logger.info('[CSRF DEBUG] Token generado correctamente:', token)
+    res.status(200).json({ message: 'CSRF cookie enviada' })
+  } catch (err) {
+    logger.error('[CSRF ERROR] Fallo al generar el token:', err)
+    res.status(500).json({ error: true, message: err.message })
+  }
 }
 
-// Middleware de protección en producción
+// Middleware de protección para rutas sensibles (aplicado solo en producción)
 export const csrfProtectionMiddleware = (req, res, next) => {
+  logger.info('[CSRF DEBUG] csrfProtectionMiddleware ejecutado')
+
   if (process.env.NODE_ENV !== 'production') {
+    logger.info('[CSRF DEBUG] CSRF deshabilitado (entorno no producción)')
     return next()
   }
 
