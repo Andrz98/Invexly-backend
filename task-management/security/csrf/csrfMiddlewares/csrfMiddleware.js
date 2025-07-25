@@ -1,7 +1,9 @@
-import { doubleCsrfProtection } from 'csrf-csrf'
+import csrfCsrf from 'csrf-csrf'
 import logger from '../../../../utils/winstonLogger/loggers.js'
 
 // Middleware completo de protección
+const doubleCsrfProtection = csrfCsrf.doubleCsrfProtection
+
 const csrfProtect = doubleCsrfProtection({
   getSecret: () => process.env.CSRF_SECRET || 'default_unsafe_csrf_secret',
   cookieName: '__Host-csrf-token',
