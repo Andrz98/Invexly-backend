@@ -13,7 +13,7 @@ import cookieParser from 'cookie-parser'
 import {
   csrfCookieMiddleware,
   csrfProtectionMiddleware
-} from './task-management/security/csrf/middlewares/csrfMiddleware.js'
+} from './task-management/security/csrf/csrfMiddlewares/csrfMiddleware.js'
 
 //=================================
 // Configuración de variables de entorno
