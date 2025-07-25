@@ -15,6 +15,9 @@ import {
   csrfProtectionMiddleware
 } from './task-management/security/csrf/middlewares/csrfMiddleware.js'
 
+//=================================
+// Configuración de variables de entorno
+//=================================
 dotenv.config()
 
 // ===================================
