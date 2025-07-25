@@ -10,7 +10,10 @@ import { sendEmail } from './task-management/controllers/emails/emailController.
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
-import csrfValidator from './task-management/security/csrfValidator/csrfValidator.js'
+import {
+  csrfCookieMiddleware,
+  csrfProtectionMiddleware
+} from './task-management/security/csrf/middlewares/csrfMiddleware.js'
 
 dotenv.config()
 
@@ -35,19 +38,14 @@ applyMiddlewares(app) // Aplica middlewares generales
 // =====================================
 // Ruta pública para obtener token CSRF
 // =====================================
-app.get('/api/token/csrf', csrfValidator, (req, res) => {
-  const token = req.csrfToken()
-  res.cookie('XSRF-TOKEN', token)
-  console.log('[CSRF] Token CSRF generado y enviado')
-  res.status(200).json({ message: 'Token CSRF enviado correctamente' })
-})
+app.get('/api/token/csrf', csrfCookieMiddleware)
 
 // =====================================
 // Protección CSRF en rutas sensibles (solo en producción)
 // =====================================
 if (process.env.NODE_ENV === 'production') {
-  app.use(['/api/profile', '/api/user'], csrfValidator)
-  app.use('/auth/logout', csrfValidator)
+  app.use(['/api/profile', '/api/user'], csrfProtectionMiddleware)
+  app.use('/auth/logout', csrfProtectionMiddleware)
 }
 
 // =====================================
