@@ -181,6 +181,7 @@ app.post('/send-email', async (req, res) => {
 // =====================================
 // Middleware Global de Manejo de Errores
 // =====================================
+app.get('/debug/token', csrfCookieMiddleware)
 app.use(errorHandler)
 
 app.use((req, res, next) => {
