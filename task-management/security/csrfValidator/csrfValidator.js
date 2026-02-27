@@ -1,10 +1,13 @@
 import Tokens from 'csrf'
 import logger from '../../../utils/winstonLogger/loggers.js'
+import getCsrfRequestDiagnostics from './csrfRequestDiagnostics.js'
 
 // Instancia única para generar y validar tokens CSRF con secretos por cookie.
 const csrfTokens = new Tokens()
 const CSRF_SECRET_COOKIE_NAME = 'csrfSecret'
 const CSRF_HEADER_NAME = 'x-csrf-token'
+const XSRF_HEADER_NAME = 'x-xsrf-token'
+const CSRF_TOKEN_COOKIE_NAME = 'XSRF-TOKEN'
 
 /**
  * Define opciones de cookie compatibles con flujos same-site y cross-site.
@@ -74,6 +77,30 @@ const ensureCsrfSecret = (req, res) => {
 }
 
 /**
+ * Genera y envía un token CSRF legible por JavaScript para clientes SPA.
+ *
+ * @param {import('express').Request} req - Solicitud HTTP entrante.
+ * @param {import('express').Response} res - Respuesta HTTP saliente.
+ * @returns {string | null} Token CSRF emitido o null si no fue posible.
+ */
+const issueCsrfToken = (req, res) => {
+  const csrfSecret = ensureCsrfSecret(req, res)
+  if (!csrfSecret) {
+    return null
+  }
+
+  const token = csrfTokens.create(csrfSecret)
+  res.cookie(CSRF_TOKEN_COOKIE_NAME, token, getCsrfTokenCookieOptions())
+
+  logger.info('[CSRF] Token CSRF emitido para cliente', {
+    ...getCsrfRequestDiagnostics(req),
+    tokenLength: token.length
+  })
+
+  return token
+}
+
+/**
  * Middleware CSRF para rutas de emisión y validación de token.
  *
  * @param {import('express').Request} req - Solicitud HTTP entrante.
@@ -83,7 +110,10 @@ const ensureCsrfSecret = (req, res) => {
  */
 const csrfValidator = (req, res, next) => {
   if (!req.cookies) {
-    logger.error('[CSRF] cookie-parser no está aplicado antes de csrfValidator')
+    logger.error(
+      '[CSRF] cookie-parser no está aplicado antes de csrfValidator',
+      getCsrfRequestDiagnostics(req)
+    )
     return res
       .status(500)
       .json({ message: 'Error interno de configuración CSRF' })
@@ -92,7 +122,10 @@ const csrfValidator = (req, res, next) => {
   // Garantizamos que siempre exista un secreto para construir o validar tokens.
   const csrfSecret = ensureCsrfSecret(req, res)
   if (!csrfSecret) {
-    logger.error('[CSRF] No fue posible generar el secreto CSRF')
+    logger.error(
+      '[CSRF] No fue posible generar el secreto CSRF',
+      getCsrfRequestDiagnostics(req)
+    )
     return res
       .status(500)
       .json({ message: 'Error interno de configuración CSRF' })
@@ -110,21 +143,37 @@ const csrfValidator = (req, res, next) => {
   }
 
   // Obtenemos el token enviado por header o por body para soportar clientes variados.
-  const sentToken = req.get(CSRF_HEADER_NAME) || req.body?._csrf
+  const sentToken =
+    req.get(CSRF_HEADER_NAME) || req.get(XSRF_HEADER_NAME) || req.body?._csrf
   const isTokenValid =
     typeof sentToken === 'string' && csrfTokens.verify(csrfSecret, sentToken)
 
   if (!isTokenValid) {
-    logger.warn('[CSRF] Token inválido o ausente', {
-      path: req.path,
+    const diagnostics = {
+      ...getCsrfRequestDiagnostics(req),
       ip: req.ip
+    }
+
+    logger.warn('[CSRF] Token inválido o ausente', diagnostics)
+
+    return res.status(403).json({
+      message: 'CSRF token inválido o ausente',
+      diagnostics:
+        process.env.NODE_ENV === 'production' ? undefined : diagnostics
     })
-    return res.status(403).json({ message: 'CSRF token inválido o ausente' })
   }
 
-  logger.debug('[CSRF] Token verificado correctamente')
+  logger.debug(
+    '[CSRF] Token verificado correctamente',
+    getCsrfRequestDiagnostics(req)
+  )
   return next()
 }
 
 export default csrfValidator
-export { getCsrfSecretCookieOptions, getCsrfTokenCookieOptions }
+export {
+  getCsrfSecretCookieOptions,
+  getCsrfTokenCookieOptions,
+  issueCsrfToken,
+  CSRF_TOKEN_COOKIE_NAME
+}

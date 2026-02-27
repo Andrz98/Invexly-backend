@@ -2,6 +2,7 @@ import User from '../../../../models/user.js'
 import { signAndSendAccessToken } from '../helpers/token/signAndSendAccessToken.js'
 import { verifyToken } from '../helpers/token/verifyToken.js'
 import logger from '../../../../utils/winstonLogger/loggers.js'
+import { issueCsrfToken } from '../../csrfValidator/csrfValidator.js'
 
 /**
  * Controlador que renueva el token de acceso utilizando el refresh token.
@@ -44,6 +45,7 @@ const refreshTokenController = async (req, res) => {
     }
 
     const accessToken = signAndSendAccessToken(res, user.id, '1h')
+    issueCsrfToken(req, res)
 
     logger.info('Token de acceso renovado correctamente', {
       userId: user.id,

@@ -11,7 +11,7 @@ import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
 import csrfValidator, {
-  getCsrfTokenCookieOptions
+  issueCsrfToken
 } from './task-management/security/csrfValidator/csrfValidator.js'
 import applyCsrfProtection from './task-management/security/csrfValidator/applyCsrfProtection.js'
 
@@ -49,10 +49,19 @@ applyMiddlewares(app) // Aplica middlewares generales
 // Ruta pública para obtener token CSRF
 // =====================================
 app.get('/api/token/csrf', csrfValidator, (req, res) => {
-  const token = req.csrfToken()
-  res.cookie('XSRF-TOKEN', token, getCsrfTokenCookieOptions())
+  const token = issueCsrfToken(req, res)
+
+  if (!token) {
+    return res
+      .status(500)
+      .json({ message: 'No fue posible emitir el token CSRF' })
+  }
+
   console.log('[CSRF] Token CSRF generado y enviado')
-  res.status(200).json({ message: 'Token CSRF enviado correctamente' })
+  return res.status(200).json({
+    message: 'Token CSRF enviado correctamente',
+    token
+  })
 })
 
 // =====================================
