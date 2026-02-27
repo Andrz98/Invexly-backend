@@ -5,6 +5,8 @@ import logger from '../../../utils/winstonLogger/loggers.js'
 const csrfTokens = new Tokens()
 const CSRF_SECRET_COOKIE_NAME = 'csrfSecret'
 const CSRF_HEADER_NAME = 'x-csrf-token'
+const XSRF_HEADER_NAME = 'x-xsrf-token'
+const CSRF_TOKEN_COOKIE_NAME = 'XSRF-TOKEN'
 
 /**
  * Define opciones de cookie compatibles con flujos same-site y cross-site.
@@ -74,6 +76,25 @@ const ensureCsrfSecret = (req, res) => {
 }
 
 /**
+ * Genera y envía un token CSRF legible por JavaScript para clientes SPA.
+ *
+ * @param {import('express').Request} req - Solicitud HTTP entrante.
+ * @param {import('express').Response} res - Respuesta HTTP saliente.
+ * @returns {string | null} Token CSRF emitido o null si no fue posible.
+ */
+const issueCsrfToken = (req, res) => {
+  const csrfSecret = ensureCsrfSecret(req, res)
+  if (!csrfSecret) {
+    return null
+  }
+
+  const token = csrfTokens.create(csrfSecret)
+  res.cookie(CSRF_TOKEN_COOKIE_NAME, token, getCsrfTokenCookieOptions())
+
+  return token
+}
+
+/**
  * Middleware CSRF para rutas de emisión y validación de token.
  *
  * @param {import('express').Request} req - Solicitud HTTP entrante.
@@ -110,7 +131,8 @@ const csrfValidator = (req, res, next) => {
   }
 
   // Obtenemos el token enviado por header o por body para soportar clientes variados.
-  const sentToken = req.get(CSRF_HEADER_NAME) || req.body?._csrf
+  const sentToken =
+    req.get(CSRF_HEADER_NAME) || req.get(XSRF_HEADER_NAME) || req.body?._csrf
   const isTokenValid =
     typeof sentToken === 'string' && csrfTokens.verify(csrfSecret, sentToken)
 
@@ -127,4 +149,9 @@ const csrfValidator = (req, res, next) => {
 }
 
 export default csrfValidator
-export { getCsrfSecretCookieOptions, getCsrfTokenCookieOptions }
+export {
+  getCsrfSecretCookieOptions,
+  getCsrfTokenCookieOptions,
+  issueCsrfToken,
+  CSRF_TOKEN_COOKIE_NAME
+}
