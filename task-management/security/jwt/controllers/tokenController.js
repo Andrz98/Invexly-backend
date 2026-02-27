@@ -6,6 +6,14 @@ import logger from '../../../../utils/winstonLogger/loggers.js'
  * Controlador que valida un access token y devuelve el usuario.
  */
 const tokenController = async (req, res) => {
+  const requestContext = {
+    ip: req.ip,
+    method: req.method,
+    origin: req.headers.origin || 'sin-origin',
+    hasTokenCookie: Boolean(req.cookies?.token),
+    hasAuthorizationHeader: Boolean(req.headers.authorization)
+  }
+
   try {
     const token =
       req.cookies.token ||
@@ -13,9 +21,9 @@ const tokenController = async (req, res) => {
 
     if (!token) {
       logger.warn('Access token no proporcionado', {
-        ip: req.ip,
+        ...requestContext,
         url: req.originalUrl,
-        method: req.method
+        status: 401
       })
 
       return res.status(401).json({ message: 'Token no proporcionado' })
@@ -26,8 +34,9 @@ const tokenController = async (req, res) => {
       decoded = verifyToken(token, process.env.JWT_SECRET)
     } catch (error) {
       logger.warn('Access token inválido', {
-        ip: req.ip,
+        ...requestContext,
         tokenSnippet: token.slice(0, 10) + '...',
+        status: error.statusCode || 500,
         errorMessage: error.message
       })
 
@@ -42,15 +51,18 @@ const tokenController = async (req, res) => {
 
     if (!user) {
       logger.warn('Usuario no encontrado al validar token', {
-        userId: decoded.id
+        ...requestContext,
+        userId: decoded.id,
+        status: 404
       })
 
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
     logger.info('Access token validado correctamente', {
+      ...requestContext,
       userId: user.id,
-      ip: req.ip
+      status: 200
     })
 
     return res.status(200).json({
@@ -64,6 +76,8 @@ const tokenController = async (req, res) => {
     })
   } catch (error) {
     logger.error('Error inesperado al validar access token', {
+      ...requestContext,
+      status: 500,
       message: error.message,
       stack: error.stack
     })

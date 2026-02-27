@@ -1,13 +1,14 @@
 import logger from '../../../utils/winstonLogger/loggers.js'
-import allowedOrigins from '../cors/config/allowedOrigins.js'
+import allowedOrigins, { normalizeOrigin } from '../cors/config/allowedOrigins.js'
 
 const handlePreflight = (req, res, next) => {
   if (req.method === 'OPTIONS') {
-    const origin = req.headers.origin
+    const requestOrigin = req.headers.origin
+    const normalizedOrigin = normalizeOrigin(requestOrigin)
 
-    if (!allowedOrigins.includes(origin)) {
+    if (!normalizedOrigin || !allowedOrigins.includes(normalizedOrigin)) {
       logger.warn('Preflight rechazado: origen no permitido', {
-        origin,
+        origin: requestOrigin,
         ip: req.ip,
         method: req.method
       })
@@ -18,11 +19,11 @@ const handlePreflight = (req, res, next) => {
     }
 
     logger.info('Preflight permitido', {
-      origin,
+      origin: normalizedOrigin,
       method: req.method
     })
 
-    res.header('Access-Control-Allow-Origin', origin)
+    res.header('Access-Control-Allow-Origin', normalizedOrigin)
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     res.header('Access-Control-Allow-Credentials', 'true')
