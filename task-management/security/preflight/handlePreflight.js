@@ -1,6 +1,5 @@
 import logger from '../../../utils/winstonLogger/loggers.js'
-
-const allowedOrigins = [process.env.FRONTEND_URL]
+import allowedOrigins from '../cors/config/allowedOrigins.js'
 
 const handlePreflight = (req, res, next) => {
   if (req.method === 'OPTIONS') {
@@ -31,7 +30,7 @@ const handlePreflight = (req, res, next) => {
     return res.sendStatus(204)
   }
 
-  next()
+  return next()
 }
 
 export default handlePreflight
