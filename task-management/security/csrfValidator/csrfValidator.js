@@ -1,5 +1,6 @@
 import Tokens from 'csrf'
 import logger from '../../../utils/winstonLogger/loggers.js'
+import getCsrfRequestDiagnostics from './csrfRequestDiagnostics.js'
 
 // Instancia única para generar y validar tokens CSRF con secretos por cookie.
 const csrfTokens = new Tokens()
@@ -91,6 +92,11 @@ const issueCsrfToken = (req, res) => {
   const token = csrfTokens.create(csrfSecret)
   res.cookie(CSRF_TOKEN_COOKIE_NAME, token, getCsrfTokenCookieOptions())
 
+  logger.info('[CSRF] Token CSRF emitido para cliente', {
+    ...getCsrfRequestDiagnostics(req),
+    tokenLength: token.length
+  })
+
   return token
 }
 
@@ -104,7 +110,10 @@ const issueCsrfToken = (req, res) => {
  */
 const csrfValidator = (req, res, next) => {
   if (!req.cookies) {
-    logger.error('[CSRF] cookie-parser no está aplicado antes de csrfValidator')
+    logger.error(
+      '[CSRF] cookie-parser no está aplicado antes de csrfValidator',
+      getCsrfRequestDiagnostics(req)
+    )
     return res
       .status(500)
       .json({ message: 'Error interno de configuración CSRF' })
@@ -113,7 +122,10 @@ const csrfValidator = (req, res, next) => {
   // Garantizamos que siempre exista un secreto para construir o validar tokens.
   const csrfSecret = ensureCsrfSecret(req, res)
   if (!csrfSecret) {
-    logger.error('[CSRF] No fue posible generar el secreto CSRF')
+    logger.error(
+      '[CSRF] No fue posible generar el secreto CSRF',
+      getCsrfRequestDiagnostics(req)
+    )
     return res
       .status(500)
       .json({ message: 'Error interno de configuración CSRF' })
@@ -137,14 +149,24 @@ const csrfValidator = (req, res, next) => {
     typeof sentToken === 'string' && csrfTokens.verify(csrfSecret, sentToken)
 
   if (!isTokenValid) {
-    logger.warn('[CSRF] Token inválido o ausente', {
-      path: req.path,
+    const diagnostics = {
+      ...getCsrfRequestDiagnostics(req),
       ip: req.ip
+    }
+
+    logger.warn('[CSRF] Token inválido o ausente', diagnostics)
+
+    return res.status(403).json({
+      message: 'CSRF token inválido o ausente',
+      diagnostics:
+        process.env.NODE_ENV === 'production' ? undefined : diagnostics
     })
-    return res.status(403).json({ message: 'CSRF token inválido o ausente' })
   }
 
-  logger.debug('[CSRF] Token verificado correctamente')
+  logger.debug(
+    '[CSRF] Token verificado correctamente',
+    getCsrfRequestDiagnostics(req)
+  )
   return next()
 }
 
