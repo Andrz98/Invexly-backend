@@ -2,6 +2,7 @@ import {
   findUserById,
   saveUser
 } from '../../../services/profileService/profileService.js'
+import bcrypt from 'bcrypt'
 
 import logger from '../../../../utils/winstonLogger/loggers.js'
 
@@ -75,7 +76,9 @@ export const updatePassword = async (req, res) => {
       )
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
-    user.password = req.body.password
+    // Hashear la contraseña antes de persistir para evitar almacenamiento en texto plano.
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    user.password = hashedPassword
     await saveUser(user)
     logger.info(`Contraseña actualizada (ID: ${req.user.id})`)
     res.status(200).json({ message: 'Contraseña actualizada correctamente' })
