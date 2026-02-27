@@ -1,10 +1,117 @@
 import Tokens from 'csrf'
 import logger from '../../../utils/winstonLogger/loggers.js'
+import allowedOrigins, {
+  normalizeOrigin
+} from '../cors/config/allowedOrigins.js'
 
 // Instancia única para generar y validar tokens CSRF con secretos por cookie.
 const csrfTokens = new Tokens()
 const CSRF_SECRET_COOKIE_NAME = 'csrfSecret'
-const CSRF_HEADER_NAME = 'x-csrf-token'
+const CSRF_HEADER_NAMES = ['x-csrf-token', 'x-xsrf-token', 'csrf-token']
+
+/**
+ * Define opciones de cookie compatibles con flujos same-site y cross-site.
+ *
+ * En producción forzamos `SameSite=None` para que navegadores modernos envíen
+ * cookies en requests con credenciales desde dominios distintos (frontend/backend).
+ *
+ * @returns {{ httpOnly: boolean, sameSite: 'none' | 'strict', secure: boolean }}
+ */
+const getCsrfSecretCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  return {
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'strict',
+    secure: isProduction
+  }
+}
+
+/**
+ * Define opciones de cookie para exponer el token CSRF al cliente.
+ *
+ * El token debe ser legible por JavaScript para enviarlo en `x-csrf-token`.
+ * En producción usamos `SameSite=None` para soportar frontend en otro dominio.
+ *
+ * @returns {{ httpOnly: boolean, sameSite: 'none' | 'strict', secure: boolean }}
+ */
+const getCsrfTokenCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  return {
+    httpOnly: false,
+    sameSite: isProduction ? 'none' : 'strict',
+    secure: isProduction
+  }
+}
+
+/**
+ * Resuelve el origin de la request a partir de `Origin` o `Referer`.
+ *
+ * @param {import('express').Request} req - Solicitud HTTP entrante.
+ * @returns {string | null} Origin normalizado o null cuando no existe.
+ */
+const getRequestOrigin = (req) => {
+  const explicitOrigin = normalizeOrigin(req.get('origin'))
+  if (explicitOrigin) {
+    return explicitOrigin
+  }
+
+  const refererHeader = req.get('referer')
+  if (typeof refererHeader !== 'string' || refererHeader.trim().length === 0) {
+    return null
+  }
+
+  try {
+    const refererOrigin = new URL(refererHeader).origin
+    return normalizeOrigin(refererOrigin)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Determina si la request viene desde un origin confiable.
+ *
+ * Esto reduce falsos positivos de CSRF en flujos SPA cross-site donde el
+ * frontend está explícitamente permitido por CORS.
+ *
+ * @param {import('express').Request} req - Solicitud HTTP entrante.
+ * @returns {boolean} true si el origin está permitido; false en otro caso.
+ */
+const isTrustedOriginRequest = (req) => {
+  const requestOrigin = getRequestOrigin(req)
+
+  return Boolean(requestOrigin && allowedOrigins.includes(requestOrigin))
+}
+
+/**
+ * Obtiene el token CSRF desde headers soportados o desde el body.
+ *
+ * Aceptamos múltiples nombres para ser compatibles con clientes comunes
+ * (por ejemplo Axios usa `X-XSRF-TOKEN` por defecto).
+ *
+ * @param {import('express').Request} req - Solicitud HTTP entrante.
+ * @returns {string | undefined} Token CSRF recibido por el cliente.
+ */
+const getCsrfTokenFromRequest = (req) => {
+  for (const headerName of CSRF_HEADER_NAMES) {
+    const tokenFromHeader = req.get(headerName)
+
+    if (
+      typeof tokenFromHeader === 'string' &&
+      tokenFromHeader.trim().length > 0
+    ) {
+      return tokenFromHeader
+    }
+  }
+
+  if (typeof req.body?._csrf === 'string' && req.body._csrf.trim().length > 0) {
+    return req.body._csrf
+  }
+
+  return undefined
+}
 
 /**
  * Obtiene el secreto CSRF actual desde cookies o crea uno nuevo.
@@ -28,11 +135,11 @@ const ensureCsrfSecret = (req, res) => {
   }
 
   // Persistimos el secreto en una cookie HttpOnly para evitar acceso desde JavaScript.
-  res.cookie(CSRF_SECRET_COOKIE_NAME, generatedSecret, {
-    httpOnly: true,
-    sameSite: 'Strict',
-    secure: process.env.NODE_ENV === 'production'
-  })
+  res.cookie(
+    CSRF_SECRET_COOKIE_NAME,
+    generatedSecret,
+    getCsrfSecretCookieOptions()
+  )
 
   return generatedSecret
 }
@@ -57,20 +164,31 @@ const csrfValidator = (req, res, next) => {
   const csrfSecret = ensureCsrfSecret(req, res)
   if (!csrfSecret) {
     logger.error('[CSRF] No fue posible generar el secreto CSRF')
-    return res.status(500).json({ message: 'Error interno de configuración CSRF' })
+    return res
+      .status(500)
+      .json({ message: 'Error interno de configuración CSRF' })
   }
 
   // Exponemos la función req.csrfToken() para mantener compatibilidad con el resto de la app.
   req.csrfToken = () => csrfTokens.create(csrfSecret)
 
-  const isMutationMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)
+  const isMutationMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(
+    req.method
+  )
   if (!isMutationMethod) {
     logger.debug('[CSRF] Método seguro detectado, no se valida token')
     return next()
   }
 
-  // Obtenemos el token enviado por header o por body para soportar clientes variados.
-  const sentToken = req.get(CSRF_HEADER_NAME) || req.body?._csrf
+  // Permitimos mutaciones desde origins explícitamente autorizados para evitar
+  // bloqueos en SPAs cross-site que ya pasan por validación estricta de CORS.
+  if (isTrustedOriginRequest(req)) {
+    logger.debug('[CSRF] Request mutante permitida por origin confiable')
+    return next()
+  }
+
+  // Obtenemos el token enviado por headers compatibles o por body.
+  const sentToken = getCsrfTokenFromRequest(req)
   const isTokenValid =
     typeof sentToken === 'string' && csrfTokens.verify(csrfSecret, sentToken)
 
@@ -87,3 +205,10 @@ const csrfValidator = (req, res, next) => {
 }
 
 export default csrfValidator
+export {
+  getCsrfSecretCookieOptions,
+  getCsrfTokenCookieOptions,
+  getCsrfTokenFromRequest,
+  getRequestOrigin,
+  isTrustedOriginRequest
+}
