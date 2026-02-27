@@ -1,4 +1,4 @@
-import allowedOrigins from './allowedOrigins.js'
+import allowedOrigins, { normalizeOrigin } from './allowedOrigins.js'
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -6,7 +6,9 @@ const corsOptions = {
       return callback(null, true)
     }
 
-    if (allowedOrigins.includes(origin)) {
+    const normalizedOrigin = normalizeOrigin(origin)
+
+    if (normalizedOrigin && allowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true)
     }
 

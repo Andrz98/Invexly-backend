@@ -22,6 +22,14 @@ const app = express()
 const port = process.env.PORT || 8080
 
 // =====================================
+// Configuración de proxy confiable
+// Necesario en producción para despliegues detrás de proxies
+// =====================================
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1)
+}
+
+// =====================================
 // Middleware para parsear cookies
 // =====================================
 app.use(cookieParser())
