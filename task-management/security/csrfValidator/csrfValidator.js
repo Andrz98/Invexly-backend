@@ -7,6 +7,42 @@ const CSRF_SECRET_COOKIE_NAME = 'csrfSecret'
 const CSRF_HEADER_NAME = 'x-csrf-token'
 
 /**
+ * Define opciones de cookie compatibles con flujos same-site y cross-site.
+ *
+ * En producción forzamos `SameSite=None` para que navegadores modernos envíen
+ * cookies en requests con credenciales desde dominios distintos (frontend/backend).
+ *
+ * @returns {{ httpOnly: boolean, sameSite: 'none' | 'strict', secure: boolean }}
+ */
+const getCsrfSecretCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  return {
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'strict',
+    secure: isProduction
+  }
+}
+
+/**
+ * Define opciones de cookie para exponer el token CSRF al cliente.
+ *
+ * El token debe ser legible por JavaScript para enviarlo en `x-csrf-token`.
+ * En producción usamos `SameSite=None` para soportar frontend en otro dominio.
+ *
+ * @returns {{ httpOnly: boolean, sameSite: 'none' | 'strict', secure: boolean }}
+ */
+const getCsrfTokenCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  return {
+    httpOnly: false,
+    sameSite: isProduction ? 'none' : 'strict',
+    secure: isProduction
+  }
+}
+
+/**
  * Obtiene el secreto CSRF actual desde cookies o crea uno nuevo.
  *
  * @param {import('express').Request} req - Solicitud HTTP entrante.
@@ -28,11 +64,11 @@ const ensureCsrfSecret = (req, res) => {
   }
 
   // Persistimos el secreto en una cookie HttpOnly para evitar acceso desde JavaScript.
-  res.cookie(CSRF_SECRET_COOKIE_NAME, generatedSecret, {
-    httpOnly: true,
-    sameSite: 'Strict',
-    secure: process.env.NODE_ENV === 'production'
-  })
+  res.cookie(
+    CSRF_SECRET_COOKIE_NAME,
+    generatedSecret,
+    getCsrfSecretCookieOptions()
+  )
 
   return generatedSecret
 }
@@ -57,13 +93,17 @@ const csrfValidator = (req, res, next) => {
   const csrfSecret = ensureCsrfSecret(req, res)
   if (!csrfSecret) {
     logger.error('[CSRF] No fue posible generar el secreto CSRF')
-    return res.status(500).json({ message: 'Error interno de configuración CSRF' })
+    return res
+      .status(500)
+      .json({ message: 'Error interno de configuración CSRF' })
   }
 
   // Exponemos la función req.csrfToken() para mantener compatibilidad con el resto de la app.
   req.csrfToken = () => csrfTokens.create(csrfSecret)
 
-  const isMutationMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)
+  const isMutationMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(
+    req.method
+  )
   if (!isMutationMethod) {
     logger.debug('[CSRF] Método seguro detectado, no se valida token')
     return next()
@@ -87,3 +127,4 @@ const csrfValidator = (req, res, next) => {
 }
 
 export default csrfValidator
+export { getCsrfSecretCookieOptions, getCsrfTokenCookieOptions }

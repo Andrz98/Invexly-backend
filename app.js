@@ -10,7 +10,9 @@ import { sendEmail } from './task-management/controllers/emails/emailController.
 import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
-import csrfValidator from './task-management/security/csrfValidator/csrfValidator.js'
+import csrfValidator, {
+  getCsrfTokenCookieOptions
+} from './task-management/security/csrfValidator/csrfValidator.js'
 import applyCsrfProtection from './task-management/security/csrfValidator/applyCsrfProtection.js'
 
 dotenv.config()
@@ -48,7 +50,7 @@ applyMiddlewares(app) // Aplica middlewares generales
 // =====================================
 app.get('/api/token/csrf', csrfValidator, (req, res) => {
   const token = req.csrfToken()
-  res.cookie('XSRF-TOKEN', token)
+  res.cookie('XSRF-TOKEN', token, getCsrfTokenCookieOptions())
   console.log('[CSRF] Token CSRF generado y enviado')
   res.status(200).json({ message: 'Token CSRF enviado correctamente' })
 })
