@@ -11,6 +11,7 @@ import User from './models/user.js'
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser'
 import csrfValidator from './task-management/security/csrfValidator/csrfValidator.js'
+import applyCsrfProtection from './task-management/security/csrfValidator/applyCsrfProtection.js'
 
 dotenv.config()
 
@@ -45,10 +46,7 @@ app.get('/api/token/csrf', csrfValidator, (req, res) => {
 // =====================================
 // Protección CSRF en rutas sensibles (solo en producción)
 // =====================================
-if (process.env.NODE_ENV === 'production') {
-  app.use(['/api/profile', '/api/user'], csrfValidator)
-  app.use('/auth/logout', csrfValidator)
-}
+applyCsrfProtection(app)
 
 // =====================================
 // Middleware para depurar cookies recibidas
