@@ -15,6 +15,8 @@ import applyCsrfProtection from './task-management/security/csrfValidator/applyC
 
 dotenv.config()
 
+// APP
+
 // ===================================
 // Instancia express y puerto definido
 // ===================================
