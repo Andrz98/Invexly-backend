@@ -68,7 +68,7 @@ const login = async (req, res, next) => {
       username: user.username,
       email: user.email,
       role: user.role,
-      profile: user.profileImage
+      profileImage: user.profileImage
     })
   } catch (error) {
     logger.error(

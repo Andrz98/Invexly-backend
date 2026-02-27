@@ -18,7 +18,7 @@ export const getProfile = async (req, res) => {
     res.status(200).json({
       username: user.username,
       email: user.email,
-      avatar: user.avatar
+      profileImage: user.profileImage
     })
   } catch (error) {
     logger.error(`Error en getProfile: ${error.message}`)
@@ -36,7 +36,10 @@ export const updateAvatar = async (req, res) => {
       )
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
-    user.avatar = req.body.avatar
+    // Mantener un único campo persistente para la imagen de perfil.
+    const profileImage = req.body.profileImage ?? req.body.avatar
+
+    user.profileImage = profileImage
     await saveUser(user)
     logger.info(`Avatar actualizado (ID: ${req.user.id})`)
     res.status(200).json({ message: 'Avatar actualizado correctamente' })
